@@ -4,26 +4,24 @@ trigger:
     include:
       - main
       - feature/*
+  paths:
+    include:
+      - '**'
 
 pool:
   vmImage: ubuntu-latest
 
-stages:
-  - stage: Build
-    displayName: Build and validate
-    jobs:
-      - job: Validate
-        steps:
-          - checkout: self
+steps:
+  - checkout: self
 
-          - script: |
-              test -f index.html
-              echo "HTML file found successfully"
-            displayName: Validate HTML entry file
+  - script: |
+      test -f index.html
+      echo "HTML file found successfully"
+    displayName: Validate HTML file
 
-          - task: PublishPipelineArtifact@1
-            displayName: Publish website artifact
-            inputs:
-              targetPath: '$(Build.SourcesDirectory)'
-              artifact: website
-              publishLocation: pipeline
+  - task: PublishPipelineArtifact@1
+    displayName: Publish website artifact
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)'
+      artifact: website
+      publishLocation: pipeline
