@@ -49,7 +49,7 @@ stages:
           - script: npm run build --if-present
             displayName: Build application
 
-          # This example assumes the deployable output is dist/.
+          # This example one assumes the deployable output is dist/.
           # Change the path or packaging strategy for your application.
           - task: CopyFiles@2
             displayName: Stage application output
