@@ -1,0 +1,63 @@
+
+# azure-pipelines.yml
+
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+      - bugfix/*
+
+# For GitHub or Bitbucket Cloud repositories.
+# For Azure Repos Git, configure PR validation using a branch policy
+# instead of relying on this YAML PR trigger.
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  nodeVersion: '22.x'
+
+stages:
+  - stage: BuildAndTest
+    displayName: Build and test
+    jobs:
+      - job: Build
+        displayName: Restore dependencies, build, and test
+        steps:
+          - checkout: self
+            clean: true
+
+          - task: UseNode@1
+            displayName: Install Node.js
+            inputs:
+              version: $(nodeVersion)
+
+          - script: npm ci
+            displayName: Restore dependencies
+
+          - script: npm run lint --if-present
+            displayName: Run lint checks
+
+          - script: npm test --if-present
+            displayName: Run tests
+
+          - script: npm run build --if-present
+            displayName: Build application
+
+          # This example assumes the deployable output is dist/.
+          # Change the path or packaging strategy for your application.
+          - task: CopyFiles@2
+            displayName: Stage application output
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/dist'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/app'
+
+          - publish: '$(Build.ArtifactStagingDirectory)/app'
+            artifact: app
+            displayName: Publish application artifact
