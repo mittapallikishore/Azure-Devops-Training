@@ -1,0 +1,29 @@
+
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build and validate
+    jobs:
+      - job: Validate
+        steps:
+          - checkout: self
+
+          - script: |
+              test -f index.html
+              echo "HTML file found successfully"
+            displayName: Validate HTML entry file
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish website artifact
+            inputs:
+              targetPath: '$(Build.SourcesDirectory)'
+              artifact: website
+              publishLocation: pipeline
