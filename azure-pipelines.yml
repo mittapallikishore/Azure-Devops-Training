@@ -24,12 +24,58 @@ steps:
       versionSpec: '22.x'
 
   - script: npm test
-    displayName: 'Run HTML quality tests'
+    
+  - powershell: |
+      New-Item -ItemType Directory -Force -Path logs | Out-Null
+      npm.cmd test 2>&1 | Tee-Object -FilePath logs/test-output.log
+      if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+      }
+    displayName: 'Run HTML quality tests and capture logs'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      searchFolder: '$(Build.SourcesDirectory)'
+      testResultsFiles: 'test-results/junit.xml'
+      failTaskOnFailedTests: true
+      failTaskOnMissingResultsFile: false
+      testRunTitle: 'HTML quality tests'
 
   - task: PublishPipelineArtifact@1
-    displayName: 'Publish website artifact'
-    condition: succeeded()
+    displayName: 'Retain test logs'
+    condition: always()
     inputs:
-      targetPath: '$(Build.SourcesDirectory)'
-      artifact: website
+      targetPath: '$(Build.SourcesDirectory)/logs'
+      artifact: 'validation-logs'
+      publishLocation: pipeline
+
+
+  - bash: |
+      mkdir -p logs
+      set +e
+      npm test 2>&1 | tee logs/test-output.log
+      test_status=${PIPESTATUS[0]}
+      exit "$test_status"
+    displayName: 'Run HTML quality tests and capture logs'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      searchFolder: '$(Build.SourcesDirectory)'
+      testResultsFiles: 'test-results/junit.xml'
+      failTaskOnFailedTests: true
+      failTaskOnMissingResultsFile: false
+      testRunTitle: 'HTML quality tests'
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Retain test logs'
+    condition: always()
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/logs'
+      artifact: 'validation-logs'
       publishLocation: pipeline
