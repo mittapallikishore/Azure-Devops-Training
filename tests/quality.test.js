@@ -9,3 +9,7 @@ assert.ok(/<html[\s>]/i.test(html), "HTML must contain an html tag");
 assert.ok(/<body[\s>]/i.test(html), "HTML must contain a body tag");
 
 console.log("PASS: HTML file exists and contains html and body tags.");
+
+
+
+assert.strictEqual(1 + 1, 3, "DEMO: This test should fail");
