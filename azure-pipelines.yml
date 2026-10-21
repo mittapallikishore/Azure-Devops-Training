@@ -77,3 +77,40 @@ steps:
       artifact: website
       publishLocation: pipeline
 
+
+- stage: DeployTest
+  displayName: Deploy to Test
+  dependsOn: Build
+  jobs:
+  - deployment: DeployToTest
+    displayName: Verify artifact in Test
+    environment: test
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: website
+          - bash: |
+              echo "Test deployment simulation successful"
+              ls -la "$(Pipeline.Workspace)/website"
+            displayName: Verify website artifact
+
+- stage: DeployStaging
+  displayName: Promote to Staging
+  dependsOn: DeployTest
+  condition: succeeded()
+  jobs:
+  - deployment: DeployToStaging
+    displayName: Verify artifact in Staging
+    environment: staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: website
+          - bash: |
+              echo "Staging deployment simulation successful"
+              cat "$(Pipeline.Workspace)/website/provenance.txt"
+            displayName: Verify artifact and provenance
