@@ -6,21 +6,29 @@ trigger:
       - feature/*
   paths:
     include:
-      - '**'
+      - index.html
+      - package.json
+      - tests/*
+      - azure-pipelines.yml
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
   - checkout: self
+    clean: true
 
-  - script: |
-      test -f index.html
-      echo "HTML file found successfully"
-    displayName: Validate HTML file
+  - task: NodeTool@0
+    displayName: 'Set up Node.js'
+    inputs:
+      versionSpec: '22.x'
+
+  - script: npm test
+    displayName: 'Run HTML quality tests'
 
   - task: PublishPipelineArtifact@1
-    displayName: Publish website artifact
+    displayName: 'Publish website artifact'
+    condition: succeeded()
     inputs:
       targetPath: '$(Build.SourcesDirectory)'
       artifact: website
