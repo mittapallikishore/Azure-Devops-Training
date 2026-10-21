@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="HTML quality tests" tests="3" failures="0">
+<testcase name="HTML file is not empty"/>
+<testcase name="HTML contains an html tag"/>
+<testcase name="HTML contains a body tag"/>
+</testsuite>

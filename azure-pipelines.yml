@@ -6,21 +6,53 @@ trigger:
       - feature/*
   paths:
     include:
-      - '**'
+      - index.html
+      - package.json
+      - tests/*
+      - azure-pipelines.yml
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-24.04
 
 steps:
   - checkout: self
+    clean: true
 
-  - script: |
-      test -f index.html
-      echo "HTML file found successfully"
-    displayName: Validate HTML file
+  - task: UseNode@1
+    displayName: 'Set up Node.js'
+    inputs:
+      version: '22.x'
+
+  - bash: |
+      mkdir -p logs
+      set +e
+      npm test 2>&1 | tee logs/test-output.log
+      test_status=${PIPESTATUS[0]}
+      exit "$test_status"
+    displayName: 'Run HTML quality tests and capture logs'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: JUnit
+      searchFolder: '$(Build.SourcesDirectory)'
+      testResultsFiles: 'test-results/junit.xml'
+      failTaskOnFailedTests: true
+      failTaskOnMissingResultsFile: false
+      testRunTitle: 'HTML quality tests'
 
   - task: PublishPipelineArtifact@1
-    displayName: Publish website artifact
+    displayName: 'Retain test logs'
+    condition: always()
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/logs'
+      artifact: 'validation-logs'
+      publishLocation: pipeline
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish website artifact'
+    condition: succeeded()
     inputs:
       targetPath: '$(Build.SourcesDirectory)'
       artifact: website
