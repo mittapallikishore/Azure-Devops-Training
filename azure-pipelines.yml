@@ -18,7 +18,7 @@ steps:
   - checkout: self
     clean: true
 
-  - task: NodeTool@0
+  - task: UseNode@1
     displayName: 'Set up Node.js'
     inputs:
       versionSpec: '22.x'
