@@ -31,6 +31,24 @@ steps:
       exit "$test_status"
     displayName: 'Run HTML quality tests and capture logs'
 
+    
+  - bash: |
+      mkdir -p "$(Build.ArtifactStagingDirectory)/website"
+
+      cp index.html "$(Build.ArtifactStagingDirectory)/website/"
+
+      cat > "$(Build.ArtifactStagingDirectory)/website/provenance.txt" <<EOF
+      BuildId: $(Build.BuildId)
+      BuildNumber: $(Build.BuildNumber)
+      CommitSHA: $(Build.SourceVersion)
+      Repository: $(Build.Repository.Name)
+      EOF
+
+      echo "Artifact provenance:"
+      cat "$(Build.ArtifactStagingDirectory)/website/provenance.txt"
+    displayName: 'Prepare versioned website artifact'
+
+
   - task: PublishTestResults@2
     displayName: 'Publish test results'
     condition: always()
@@ -50,10 +68,12 @@ steps:
       artifact: 'validation-logs'
       publishLocation: pipeline
 
+  
   - task: PublishPipelineArtifact@1
-    displayName: 'Publish website artifact'
+    displayName: 'Publish versioned website artifact'
     condition: succeeded()
     inputs:
-      targetPath: '$(Build.SourcesDirectory)'
+      targetPath: '$(Build.ArtifactStagingDirectory)/website'
       artifact: website
       publishLocation: pipeline
+
