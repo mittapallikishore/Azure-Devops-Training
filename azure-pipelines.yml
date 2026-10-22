@@ -14,46 +14,113 @@ trigger:
 pool:
   vmImage: ubuntu-24.04
 
-steps:
-  - checkout: self
-    clean: true
+stages:
+  # Stage 1: Build, test, and publish the artifact
+  - stage: BuildAndTest
+    displayName: Build and Test
+    jobs:
+      - job: Build
+        displayName: Validate website
+        steps:
+          - checkout: self
+            clean: true
 
-  - task: UseNode@1
-    displayName: 'Set up Node.js'
-    inputs:
-      version: '22.x'
+          - task: UseNode@1
+            displayName: Set up Node.js
+            inputs:
+              version: '22.x'
 
-  - bash: |
-      mkdir -p logs
-      set +e
-      npm test 2>&1 | tee logs/test-output.log
-      test_status=${PIPESTATUS[0]}
-      exit "$test_status"
-    displayName: 'Run HTML quality tests and capture logs'
+          - bash: |
+              mkdir -p logs
+              set +e
+              npm test 2>&1 | tee logs/test-output.log
+              test_status=${PIPESTATUS[0]}
+              exit "$test_status"
+            displayName: Run HTML quality tests and capture logs
 
-  - task: PublishTestResults@2
-    displayName: 'Publish test results'
-    condition: always()
-    inputs:
-      testResultsFormat: JUnit
-      searchFolder: '$(Build.SourcesDirectory)'
-      testResultsFiles: 'test-results/junit.xml'
-      failTaskOnFailedTests: true
-      failTaskOnMissingResultsFile: false
-      testRunTitle: 'HTML quality tests'
+          - task: PublishTestResults@2
+            displayName: Publish test results
+            condition: always()
+            inputs:
+              testResultsFormat: JUnit
+              searchFolder: '$(Build.SourcesDirectory)'
+              testResultsFiles: 'test-results/junit.xml'
+              failTaskOnFailedTests: true
+              failTaskOnMissingResultsFile: false
+              testRunTitle: HTML quality tests
 
-  - task: PublishPipelineArtifact@1
-    displayName: 'Retain test logs'
-    condition: always()
-    inputs:
-      targetPath: '$(Build.SourcesDirectory)/logs'
-      artifact: 'validation-logs'
-      publishLocation: pipeline
+          - task: PublishPipelineArtifact@1
+            displayName: Retain test logs
+            condition: always()
+            inputs:
+              targetPath: '$(Build.SourcesDirectory)/logs'
+              artifact: validation-logs
+              publishLocation: pipeline
 
-  - task: PublishPipelineArtifact@1
-    displayName: 'Publish website artifact'
+          - bash: |
+              mkdir -p "$(Build.ArtifactStagingDirectory)/website"
+              cp index.html "$(Build.ArtifactStagingDirectory)/website/"
+
+              cat > "$(Build.ArtifactStagingDirectory)/website/provenance.txt" <<EOF
+              BuildId: $(Build.BuildId)
+              BuildNumber: $(Build.BuildNumber)
+              CommitSHA: $(Build.SourceVersion)
+              Repository: $(Build.Repository.Name)
+              EOF
+
+              echo "Artifact provenance:"
+              cat "$(Build.ArtifactStagingDirectory)/website/provenance.txt"
+            displayName: Prepare versioned website artifact
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish versioned website artifact
+            condition: succeeded()
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/website'
+              artifact: website
+              publishLocation: pipeline
+
+  # Stage 2: Download and verify the same artifact in Test
+  - stage: DeployTest
+    displayName: Deploy to Test
+    dependsOn: BuildAndTest
     condition: succeeded()
-    inputs:
-      targetPath: '$(Build.SourcesDirectory)'
-      artifact: website
-      publishLocation: pipeline
+    jobs:
+      - deployment: DeployToTest
+        displayName: Verify artifact in Test
+        environment: test
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: website
+
+                - bash: |
+                    echo "Test deployment simulation successful"
+                    ls -la "$(Pipeline.Workspace)/website"
+                    test -s "$(Pipeline.Workspace)/website/index.html"
+                    test -s "$(Pipeline.Workspace)/website/provenance.txt"
+                  displayName: Verify website artifact
+
+  # Stage 3: Promote the same artifact to Staging
+  - stage: DeployStaging
+    displayName: Promote to Staging
+    dependsOn: DeployTest
+    condition: succeeded()
+    jobs:
+      - deployment: DeployToStaging
+        displayName: Verify artifact in Staging
+        environment: staging
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: website
+
+                - bash: |
+                    echo "Staging deployment simulation successful"
+                    cat "$(Pipeline.Workspace)/website/provenance.txt"
+                    test -s "$(Pipeline.Workspace)/website/index.html"
+                  displayName: Verify artifact and provenance
