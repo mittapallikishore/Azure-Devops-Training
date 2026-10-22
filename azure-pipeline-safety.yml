@@ -14,7 +14,7 @@ variables:
 
   # Set to true only when testing a deliberate failure.
   - name: SIMULATE_HEALTH_FAILURE
-    value: 'true'
+    value: 'false'
 
 stages:
   - stage: Validate
