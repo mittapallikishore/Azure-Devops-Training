@@ -32,3 +32,39 @@ steps:
       PathtoPublish: '$(Build.SourcesDirectory)/azure-website-project'
       ArtifactName: website
       publishLocation: Container
+
+
+  - task: Bash@3
+    displayName: Verify deployed website health
+    inputs:
+      targetType: inline
+      script: |
+        echo "Starting health-check verification..."
+
+        if [ "${SIMULATE_HEALTH_FAILURE:-false}" = "true" ]; then
+          echo "ERROR: Deliberate health-check failure requested."
+          echo "DIAGNOSTIC: Failure simulation is enabled."
+          exit 1
+        fi
+
+        if [ -z "${HEALTH_URL:-}" ]; then
+          echo "ERROR: HEALTH_URL is not configured."
+          exit 1
+        fi
+
+        response=$(curl --silent --show-error --fail \
+          --max-time 10 "$HEALTH_URL") || {
+          echo "ERROR: Health endpoint request failed."
+          exit 1
+        }
+
+        echo "$response" | grep -q '"status"[[:space:]]*:[[:space:]]*"healthy"' || {
+          echo "ERROR: Health endpoint did not report healthy."
+          exit 1
+        }
+
+        echo "SUCCESS: Website health check passed."
+    env:
+      HEALTH_URL: $(HEALTH_URL)
+      SIMULATE_HEALTH_FAILURE: $(SIMULATE_HEALTH_FAILURE)
+
