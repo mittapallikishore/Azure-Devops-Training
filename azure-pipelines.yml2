@@ -1,0 +1,100 @@
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  # Change this to your real application's health endpoint.
+  - name: HEALTH_URL
+    value: 'https://example.com/health'
+
+  # Set to true only when testing a deliberate failure.
+  - name: SIMULATE_HEALTH_FAILURE
+    value: 'true'
+
+stages:
+  - stage: Validate
+    displayName: Build and validate
+    jobs:
+      - job: ValidateApp
+        steps:
+          - checkout: self
+            clean: true
+
+          - powershell: |
+              Write-Host "Repository checkout completed."
+              Write-Host "Commit: $(Build.SourceVersion)"
+            displayName: Clean checkout diagnostics
+
+          # Add your actual restore, build and test commands here.
+          - powershell: |
+              Write-Host "Validation placeholder passed."
+            displayName: Basic validation
+
+          - powershell: |
+              New-Item -ItemType Directory -Force `
+                -Path "$(Build.ArtifactStagingDirectory)" | Out-Null
+
+              "Build $(Build.BuildNumber)" |
+                Set-Content "$(Build.ArtifactStagingDirectory)/build-info.txt"
+
+            displayName: Prepare versioned artifact
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: 'app-package'
+            displayName: Publish artifact
+
+  - stage: Deploy
+    displayName: Deploy and verify
+    dependsOn: Validate
+    condition: succeeded()
+    jobs:
+      - job: DeployApp
+        steps:
+          # Replace this with your actual deployment task.
+          - powershell: |
+              Write-Host "Deployment placeholder executed."
+              Write-Host "Build: $(Build.BuildNumber)"
+            displayName: Deploy application placeholder
+
+          - powershell: |
+              $ErrorActionPreference = 'Stop'
+
+              Write-Host "Starting application health check."
+
+              if ($env:SIMULATE_HEALTH_FAILURE -eq 'true') {
+                throw "SIMULATED HEALTH CHECK FAILURE"
+              }
+
+              $response = Invoke-WebRequest `
+                -Uri $env:HEALTH_URL `
+                -Method Get `
+                -TimeoutSec 15 `
+                -UseBasicParsing
+
+              Write-Host "HTTP status: $([int]$response.StatusCode)"
+
+              if ([int]$response.StatusCode -ne 200) {
+                throw "Health check failed: expected HTTP 200."
+              }
+
+              Write-Host "Health check passed."
+            displayName: Verify deployment health
+            env:
+              HEALTH_URL: $(HEALTH_URL)
+              SIMULATE_HEALTH_FAILURE: $(SIMULATE_HEALTH_FAILURE)
+
+          # This is a rollback hook, not a real rollback command yet.
+          - powershell: |
+              Write-Host "Health check or deployment failed."
+              Write-Host "Failed build: $(Build.BuildNumber)"
+              Write-Host "Review the failed task logs."
+              Write-Host "Replace this hook with your platform-specific rollback."
+            displayName: Rollback diagnostics
+            condition: failed()
