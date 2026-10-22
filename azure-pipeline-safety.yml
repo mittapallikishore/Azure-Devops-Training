@@ -98,3 +98,4 @@ stages:
               Write-Host "Replace this hook with your platform-specific rollback."
             displayName: Rollback diagnostics
             condition: failed()
+#not added to git repo
