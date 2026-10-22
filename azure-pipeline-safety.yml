@@ -10,11 +10,11 @@ pool:
 variables:
   # Change this to your real application's health endpoint.
   - name: HEALTH_URL
-    value: 'https://example.com/health'
+  value: 'http://localhost:3000/health'
 
   # Set to true only when testing a deliberate failure.
   - name: SIMULATE_HEALTH_FAILURE
-    value: 'true'
+    value: 'false'
 
 stages:
   - stage: Validate
@@ -31,9 +31,19 @@ stages:
             displayName: Clean checkout diagnostics
 
           # Add your actual restore, build and test commands here.
-          - powershell: |
-              Write-Host "Validation placeholder passed."
-            displayName: Basic validation
+          - task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: Install Node.js
+
+- script: npm ci
+  displayName: Install dependencies
+
+- script: npm run build
+  displayName: Build application
+
+- script: npm test
+  displayName: Run unit tests
 
           - powershell: |
               New-Item -ItemType Directory -Force `
@@ -98,3 +108,4 @@ stages:
               Write-Host "Replace this hook with your platform-specific rollback."
             displayName: Rollback diagnostics
             condition: failed()
+#not added to git repo
