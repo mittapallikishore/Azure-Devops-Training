@@ -1,0 +1,34 @@
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - azure-website-project/**
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+
+  - task: NodeTool@0
+    displayName: Install Node.js
+    inputs:
+      versionSpec: '20.x'
+
+  - script: npm ci
+    displayName: Install dependencies
+    workingDirectory: $(Build.SourcesDirectory)/azure-website-project
+
+  - script: npm test
+    displayName: Run website quality tests
+    workingDirectory: $(Build.SourcesDirectory)/azure-website-project
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish website artifact
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/azure-website-project'
+      ArtifactName: website
+      publishLocation: Container
