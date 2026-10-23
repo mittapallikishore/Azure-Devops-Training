@@ -22,8 +22,11 @@ steps:
     displayName: Run existing unit tests
     workingDirectory: azure-website-project
 
-  - script: node tests/test.js
+    
+  - script: |
+      node tests/test.js
     displayName: Run separate demonstration test
     workingDirectory: azure-website-project
     env:
       INTENTIONAL_TEST_FAILURE: ${{ parameters.runFailingTest }}
+
