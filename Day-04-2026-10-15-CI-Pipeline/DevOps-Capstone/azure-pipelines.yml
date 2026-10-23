@@ -5,7 +5,7 @@ trigger:
       - main
   paths:
     include:
-      - Day-03-2026-10-14-Azure-Resources-and-Identity/DevOps-Capstone/*
+       - Day-04-2026-10-15-CI-Pipeline/DevOps-Capstone/**
 
 pr:
   branches:
@@ -16,7 +16,7 @@ pool:
   vmImage: windows-latest
 
 variables:
-  projectPath: 'Day-03-2026-10-14-Azure-Resources-and-Identity/DevOps-Capstone'
+  projectPath: 'Day-04-2026-10-15-CI-Pipeline/DevOps-Capstone'
 
 stages:
   - stage: Validate
