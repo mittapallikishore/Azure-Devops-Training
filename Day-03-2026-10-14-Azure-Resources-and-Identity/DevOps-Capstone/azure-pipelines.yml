@@ -44,12 +44,10 @@ stages:
 
                 Write-Host "Project files validated successfully."
 
-          
-                - task: UseNode@1
-              displayName: Install Node.js
+          - task: NodeTool@0
+            displayName: Install Node.js
             inputs:
-            version: '20.x'
-
+              versionSpec: '20.x'
 
           - task: PowerShell@2
             displayName: Install Dependencies and Run Tests
@@ -92,6 +90,7 @@ stages:
     condition: succeeded()
     jobs:
       - job: PublishArtifact
+        displayName: Publish Capstone Files
         steps:
           - task: CopyFiles@2
             displayName: Copy Project Files
