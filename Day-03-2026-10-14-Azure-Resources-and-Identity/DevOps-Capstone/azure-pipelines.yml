@@ -44,10 +44,12 @@ stages:
 
                 Write-Host "Project files validated successfully."
 
-          - task: NodeTool@0
-            displayName: Install Node.js
+          
+                - task: UseNode@1
+              displayName: Install Node.js
             inputs:
-              versionSpec: '20.x'
+            version: '20.x'
+
 
           - task: PowerShell@2
             displayName: Install Dependencies and Run Tests
