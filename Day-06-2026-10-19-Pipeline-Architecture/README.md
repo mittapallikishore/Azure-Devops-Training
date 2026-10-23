@@ -1,38 +1,42 @@
 # Day 6 — Pipeline Architecture and Repository Triggers
 
 ## 1. Objective
+Design a basic Azure DevOps validation pipeline, define repository triggers, and publish a readable validation artifact.
 
-Design and document a basic Azure DevOps validation pipeline that checks repository structure and publishes a readable artifact.
-
-## 2. Repository and Branching
-
-- Platform: Azure DevOps Pipelines
+## 2. Repository Details
 - Source control: GitHub
 - Working branch: `test/pipeline-failure`
-- Pipeline configuration: `azure-pipelines.yml`
+- Pipeline file: `azure-pipelines.yml`
 
 ## 3. Pipeline Flow
-
-1. **Checkout:** Downloads a clean copy of the repository.
+1. **Checkout:** Retrieves a clean copy of the repository.
 2. **Validation:** Checks that the Day 4 project folder exists.
-3. **Artifact creation:** Creates `result.txt` containing the validation result.
-4. **Artifact publication:** Publishes the file as `Day6-Validation`.
+3. **Artifact creation:** Creates `result.txt` with the validation result.
+4. **Artifact publication:** Publishes the `Day6-Validation` artifact.
 
 See `pipeline-diagram.md` for the pipeline flow diagram.
 
 ## 4. Trigger Policy
+- **Main branch:** Runs on changes to `main`.
+- **Feature branches:** Runs on changes to `feature/*`.
+- **Test branches:** Runs on changes to `test/*`.
+- **Pull requests:** YAML is configured to validate pull requests targeting `main`.
 
-The YAML pipeline is configured to trigger on changes to:
+Actual trigger behavior must be verified by observing pipeline runs after the relevant branch updates or pull requests.
 
-- `main`
-- `feature/*`
-- `test/*`
+## 5. Validation Results
+- Pipeline run: Succeeded.
+- Clean checkout: Configured with `clean: true`.
+- Artifact: `Day6-Validation`.
+- Output file: `result.txt`.
+- Expected output: `Repository validation passed.`
 
-Pull-request validation is not enabled in YAML (`pr: none`). Configure and verify the appropriate pull-request validation policy in Azure DevOps if supported by the repository and project settings.
+## 6. Acceptance Criteria
+- [x] Pipeline configuration documented.
+- [x] Pipeline diagram created.
+- [x] Pipeline run succeeded.
+- [x] Readable validation artifact published.
+- [ ] Pull-request trigger verified with an actual pull request.
 
-## 5. Testing and Expected Results
-
-- A clean checkout should retrieve the repository files.
-- The validation step should pass when the Day 4 project folder exists.
-- The pipeline should create and publish `result.txt`.
-- If the
+## 7. Conclusion
+The basic validation pipeline successfully checks repository structure and publishes a readable artifact. Pull-request behavior remains subject to verification through an actual pull request targeting `main`.
