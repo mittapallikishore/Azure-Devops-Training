@@ -30,6 +30,9 @@ stages:
             inputs:
               version: '22.x'
 
+          - bash: npm ci
+            displayName: Install dependencies
+
           - bash: |
               mkdir -p logs
               set +e
