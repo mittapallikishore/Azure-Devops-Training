@@ -1,1 +1,1 @@
-Environment: Production
+Environment: Development and Production
