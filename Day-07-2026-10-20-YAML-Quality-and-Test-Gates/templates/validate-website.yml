@@ -1,0 +1,29 @@
+
+parameters:
+  - name: runFailingTest
+    type: boolean
+    default: false
+
+steps:
+  - task: UseNode@1
+    displayName: Install Node.js 20
+    inputs:
+      version: '20.x'
+
+  - script: npm ci
+    displayName: Install dependencies
+    workingDirectory: azure-website-project
+
+  - script: node --check server.js
+    displayName: Static syntax check
+    workingDirectory: azure-website-project
+
+  - script: npm test
+    displayName: Run existing unit tests
+    workingDirectory: azure-website-project
+
+  - script: node tests/test.js
+    displayName: Run separate demonstration test
+    workingDirectory: azure-website-project
+    env:
+      INTENTIONAL_TEST_FAILURE: ${{ parameters.runFailingTest }}
