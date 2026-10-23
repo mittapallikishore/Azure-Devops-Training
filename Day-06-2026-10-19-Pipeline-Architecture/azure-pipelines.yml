@@ -6,7 +6,10 @@ trigger:
       - feature/*
       - test/*
 
-pr: none
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   vmImage: windows-latest
