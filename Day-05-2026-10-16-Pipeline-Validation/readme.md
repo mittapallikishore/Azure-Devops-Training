@@ -34,3 +34,5 @@ Validate pipeline execution, test success and failure scenarios, and verify arti
 
 ## Conclusion
 Successfully demonstrated pipeline validation, artifact publication, and intentional failure handling in Azure DevOps.
+
+“I created and tested separate Azure DevOps success and failure pipelines. I verified artifact publication, confirmed that result.txt was generated, tested intentional failure handling, and documented the results in GitHub.”
