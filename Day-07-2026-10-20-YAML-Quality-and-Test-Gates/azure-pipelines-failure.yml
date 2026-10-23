@@ -1,0 +1,20 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-24.04
+
+steps:
+  - checkout: self
+    clean: true
+
+  - template: templates/validate-website.yml
+    parameters:
+      runFailingTest: true
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish artifact (should be skipped)
+    condition: succeeded()
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/azure-website-project'
+      artifact: 'Day7-Website-Failure-Demo'
