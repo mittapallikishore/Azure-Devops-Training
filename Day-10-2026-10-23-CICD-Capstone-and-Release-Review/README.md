@@ -38,3 +38,17 @@ Consolidated the CI/CD learning tasks and documented the end-to-end pipeline wor
 
 ## Limitations and Next Steps
 Record any stages that were reviewed but not fully implemented, such as deployment to a live environment, approval gates, or a complete rollback demonstration. Plan to validate these steps in a sandbox before using the pipeline for production releases.
+
+## Execution Results
+
+- **Build and validation:** Succeeded in Azure DevOps.
+- **Artifact publication:** Succeeded. `Website-Release` contains only the website application files and `release-info.txt`; training documentation folders are excluded.
+- **Deployment gate:** Manual approval stage configured to review the release artifact before deployment.
+- **Smoke-test validation:** Succeeded. Confirmed that the website application directory and `index.html` exist.
+- **Pull-request validation:** Not yet configured as an automatic PR trigger; the current pipeline uses manual execution.
+- **Post-deployment smoke test:** Pending deployment to a real environment and verification through an HTTP health endpoint.
+- **Rollback:** Recovery procedure documented, but actual rollback execution remains pending environment configuration.
+
+## Conclusion
+
+The capstone validation pipeline publishes a focused website artifact and includes a manual approval gate. A separate smoke-test pipeline verifies the required website files. Actual deployment, automatic PR validation, post-deployment verification, and rollback execution remain outstanding before the full end-to-end release acceptance criteria can be considered complete.
