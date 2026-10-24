@@ -1,6 +1,14 @@
 
-trigger: none
-pr: none
+trigger:
+  branches:
+    include:
+      - main
+      - test/pipeline-failure
+
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   vmImage: ubuntu-latest
