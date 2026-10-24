@@ -52,3 +52,20 @@ Record any stages that were reviewed but not fully implemented, such as deployme
 ## Conclusion
 
 The capstone validation pipeline publishes a focused website artifact and includes a manual approval gate. A separate smoke-test pipeline verifies the required website files. Actual deployment, automatic PR validation, post-deployment verification, and rollback execution remain outstanding before the full end-to-end release acceptance criteria can be considered complete.
+
+## Final Validation Results
+
+- Build and test pipeline completed successfully.
+- Website release artifact was published with build information.
+- Pull-request validation checks passed, and the changes were merged.
+- Live Azure App Service smoke-test pipeline succeeded.
+- Rollback-readiness validation pipeline succeeded.
+- Manual approval gate was configured in the CI/CD pipeline.
+
+### Limitations
+
+Actual automated deployment and live rollback were not executed because Azure DevOps deployment authorization was not configured. The smoke test verified the existing live website, and the rollback pipeline validated readiness checks only.
+
+### Conclusion
+
+The CI/CD validation, artifact publication, pull-request checks, live website health verification, and rollback-readiness checks were completed successfully. Automated deployment and actual rollback remain pending.
