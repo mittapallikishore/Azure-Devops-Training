@@ -1,0 +1,30 @@
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      set -eu
+
+      APP_DIR="$(Build.SourcesDirectory)/azure-website-project"
+
+      if [ ! -d "$APP_DIR" ]; then
+        echo "ERROR: Website application folder not found."
+        exit 1
+      fi
+
+      if [ ! -f "$APP_DIR/index.html" ]; then
+        echo "ERROR: index.html is missing."
+        exit 1
+      fi
+
+      echo "PASS: Website application folder exists."
+      echo "PASS: index.html exists."
+      echo "Artifact-content smoke checks passed."
+    displayName: 'Smoke-test website files'
