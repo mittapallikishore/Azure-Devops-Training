@@ -1,0 +1,72 @@
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20'
+
+stages:
+  - stage: Validate
+    displayName: 'Pull Request Validation'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Install, Build and Test'
+        steps:
+          - checkout: self
+            clean: true
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(NODE_VERSION)'
+            displayName: 'Set up Node.js'
+
+          - script: |
+              cd "$(Build.SourcesDirectory)/azure-website-project"
+
+              if [ -f package-lock.json ]; then
+                npm ci
+              elif [ -f package.json ]; then
+                npm install
+              else
+                echo "ERROR: package.json not found."
+                exit 1
+              fi
+            displayName: 'Install dependencies'
+
+          - script: |
+              cd "$(Build.SourcesDirectory)/azure-website-project"
+
+              npm run build --if-present
+              npm test --if-present
+            displayName: 'Build and test website'
+
+          - script: |
+              APP_DIR="$(Build.SourcesDirectory)/azure-website-project"
+              RELEASE_DIR="$(Build.ArtifactStagingDirectory)/release"
+
+              test -f "$APP_DIR/index.html" || {
+                echo "ERROR: index.html is missing."
+                exit 1
+              }
+
+              mkdir -p "$RELEASE_DIR"
+              cp -R "$APP_DIR/." "$RELEASE_DIR/"
+
+              printf "Build ID: %s\nCommit: %s\n" \
+                "$(Build.BuildId)" "$(Build.SourceVersion)" \
+                > "$RELEASE_DIR/release-info.txt"
+            displayName: 'Validate and prepare website artifact'
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/release'
+              artifact: 'Website-Release'
+              publishLocation: 'pipeline'
+            displayName: 'Publish validated artifact'
