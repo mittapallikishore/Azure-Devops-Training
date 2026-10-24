@@ -5,28 +5,34 @@ pr: none
 pool:
   vmImage: ubuntu-24.04
 
-resources:
-  pipelines:
-    - pipeline: buildPipeline
-      source: 'Day 08 Build'
-      trigger: none
-
 stages:
   - stage: Test
     displayName: Test Environment
     jobs:
       - job: ValidateTestArtifact
+        displayName: Validate release in Test
         steps:
-          - download: buildPipeline
-            artifact: Website-Release
+          - checkout: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download successful build artifact
+            inputs:
+              buildType: specific
+              project: '$(System.TeamProject)'
+              definition: '11'
+              buildVersionToDownload: specific
+              pipelineId: '114'
+              artifactName: Website-Release
+              targetPath: '$(Pipeline.Workspace)/Website-Release'
 
           - script: |
-              echo "Validating artifact in Test environment"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/index.html"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/server.js"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
-              cat "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
-            displayName: Verify release files
+              set -e
+              test -f "$(Pipeline.Workspace)/Website-Release/index.html"
+              test -f "$(Pipeline.Workspace)/Website-Release/server.js"
+              test -f "$(Pipeline.Workspace)/Website-Release/release-info.txt"
+              cat "$(Pipeline.Workspace)/Website-Release/release-info.txt"
+              echo "Test environment artifact validation passed."
+            displayName: Verify Test artifact
 
   - stage: Production
     displayName: Production Environment
@@ -34,14 +40,26 @@ stages:
     condition: succeeded()
     jobs:
       - job: ValidateProductionArtifact
+        displayName: Validate release in Production
         steps:
-          - download: buildPipeline
-            artifact: Website-Release
+          - checkout: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download the same release artifact
+            inputs:
+              buildType: specific
+              project: '$(System.TeamProject)'
+              definition: '11'
+              buildVersionToDownload: specific
+              pipelineId: '114'
+              artifactName: Website-Release
+              targetPath: '$(Pipeline.Workspace)/Website-Release'
 
           - script: |
-              echo "Validating the same artifact in Production"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/index.html"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/server.js"
-              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
-              cat "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
-            displayName: Verify promoted release
+              set -e
+              test -f "$(Pipeline.Workspace)/Website-Release/index.html"
+              test -f "$(Pipeline.Workspace)/Website-Release/server.js"
+              test -f "$(Pipeline.Workspace)/Website-Release/release-info.txt"
+              cat "$(Pipeline.Workspace)/Website-Release/release-info.txt"
+              echo "Production environment artifact validation passed."
+            displayName: Verify Production artifact
