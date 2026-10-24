@@ -1,39 +1,36 @@
 # Day 9 — Deployment Safety and Diagnostics
 
-**Date:** 22 October 2026
-
 ## Objective
-Improve deployment safety through secure secrets handling, health checks, diagnostics, and rollback procedures.
+Improve pipeline safety by validating release files, checking health status, diagnosing failures, and documenting recovery steps.
 
 ## Tasks Performed
-1. **Secret Variables:** Reviewed how sensitive values can be stored securely in Azure DevOps instead of being committed to source control.
-2. **Service Connections:** Configured or reviewed service connections used by pipelines to access deployment resources.
-3. **Pipeline Permissions:** Reviewed access permissions and authorization required for deployment tasks.
-4. **Health Checks:** Added or reviewed health-check steps to verify whether the application is responding after deployment.
-5. **Deployment Verification:** Examined pipeline results to confirm whether deployment validation succeeded.
-6. **Failure Diagnostics:** Reviewed logs to identify deployment and health-check failures.
-7. **Rollback Strategy:** Documented how to redeploy a previously published artifact to recover from an unsuccessful release.
-8. **Failure Testing:** Tested or reviewed a simulated health-check failure and examined the resulting pipeline output.
+1. **Clean checkout:** The pipeline starts with a clean repository checkout.
+2. **Release validation:** It checks that the Day 8 release documentation exists.
+3. **Health check:** It runs a health-check stage that passes normally and can be configured to fail for testing.
+4. **Failure diagnostics:** Clear error messages help identify why a pipeline step failed.
+5. **Secret management:** No secrets are hardcoded or printed. Real deployment credentials should be stored securely in Azure DevOps secret variables or service connections.
+6. **Recovery plan:** If validation fails, investigate the logs and rerun after fixing the issue. For a real deployment, redeploy the last known-good artifact and verify application health.
+
+## Failure Test
+Set `SIMULATE_HEALTH_FAILURE` to `true` in the pipeline YAML and run the pipeline to confirm that the health-check step fails with a clear message. Restore it to `false` and rerun to confirm success.
 
 ## Observations
-- Secrets should never be committed to Git or printed in pipeline logs.
-- Service connections must be configured and authorized correctly.
-- Health checks help identify application issues after deployment.
-- A failed health check should be reported clearly.
-- A documented rollback procedure helps restore a known working version.
+- Clean checkout helps avoid using stale workspace files.
+- Release-file validation catches missing inputs early.
+- Health-check failures should stop the pipeline and provide actionable logs.
+- Real deployment and rollback require a configured target environment and a previously published artifact.
 
-## Outcome
-Reviewed deployment security, health verification, diagnostic logging, and rollback procedures to support safer releases.
+## Result
+A starter deployment-safety validation pipeline has been created. Actual deployment, secret-backed service connections, and rollback execution remain dependent on environment configuration.
 
 ## Evidence to Capture
-- Secure variable or service connection configuration, without exposing secrets.
-- Successful health-check output.
-- Failed health-check log.
-- Previous artifact version and documented rollback steps.
+- Successful pipeline run.
+- Failed simulated health-check run.
+- Logs showing the failure message.
+- Successful run after restoring the health-check setting.
 
-## Recovery Procedure
-1. Identify the failed deployment or health check.
-2. Review the pipeline logs and deployment status.
-3. Select the last known good artifact.
-4. Redeploy that artifact using the approved process.
-5. Run the health check again and record the result.
+## Recovery Instructions
+1. Open the failed pipeline run and inspect the failing step.
+2. Fix the missing file or restore the health-check setting.
+3. Rerun validation.
+4. For a real deployment, redeploy the last known-good artifact and verify the application health endpoint.

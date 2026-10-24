@@ -1,30 +1,42 @@
 # Day 8 — Artifact Versioning and Environment Promotion
 
-**Date:** 21 October 2026
-
 ## Objective
-Understand how to version build artifacts and promote the same validated artifact between environments safely.
+Build a versioned release artifact and validate its promotion through Test and Production stages using Azure DevOps YAML pipelines.
 
 ## Tasks Performed
-1. **Artifact Versioning:** Reviewed how build numbers and Git commit IDs can uniquely identify a build.
-2. **Artifact Publication:** Configured or reviewed how pipeline outputs are published as downloadable artifacts.
-3. **Build and Deployment Separation:** Understood why building the application separately from deployment improves consistency.
-4. **Artifact Traceability:** Reviewed how to link an artifact to its source commit and pipeline run.
-5. **Environment Configuration:** Explored how environment-specific settings can be managed separately from application artifacts.
-6. **Environment Promotion:** Reviewed how the same artifact can be promoted from a test environment to staging after validation.
-7. **Approvals and Gates:** Learned how environment approvals and checks help control deployment progression.
+
+1. **Build pipeline:** Configured the pipeline to check out the repository, install Node.js dependencies, validate JavaScript syntax, and run unit tests.
+2. **Artifact publication:** Published the `Website-Release` artifact containing `index.html`, `server.js`, and `release-info.txt`.
+3. **Artifact versioning:** Recorded the pipeline Build ID and source commit in `release-info.txt` to trace the release back to its source.
+4. **Separate promotion pipeline:** Created `azure-pipelines-promotion.yml` to download and validate the release artifact.
+5. **Test validation:** Verified that all required release files exist in the Test stage.
+6. **Production validation:** Verified the release files again in the Production stage, which runs only after Test succeeds.
+
+## Pipeline Flow
+
+GitHub Repository → Build and Test → Publish `Website-Release` → Test Validation → Production Validation
 
 ## Observations
-- Unique artifact versions help identify exactly what was built.
-- Reusing the same artifact reduces differences between environments.
-- Environment-specific configuration should be kept separate from build outputs.
-- Approvals and checks help prevent unverified releases from progressing.
 
-## Outcome
-Understood artifact versioning, traceability, build and deployment separation, and controlled promotion between environments.
+- The build pipeline completed successfully.
+- The `Website-Release` artifact was published successfully.
+- The release metadata identifies the build and source commit.
+- The separate promotion pipeline completed successfully.
+- Both Test and Production validation stages passed.
 
-## Evidence to Capture
-- Pipeline run number or source commit ID.
-- Published artifact and its version.
-- Artifact download or publication result.
-- Environment approval or promotion result, if configured.
+## Result
+
+The artifact build, publication, version traceability, and staged validation workflow was demonstrated successfully using Azure DevOps.
+
+**Scope note:** Test and Production are pipeline validation stages for this exercise. No deployment to actual application servers was performed.
+
+## Evidence to Attach
+
+- Screenshot of the successful build pipeline.
+- Screenshot showing the published `Website-Release` artifact.
+- Screenshot of the successful promotion pipeline with both stages passing.
+- Screenshot or contents of `release-info.txt`.
+
+## Recovery Notes
+
+If a pipeline fails, inspect the failed task and its logs. Confirm that the selected build run contains the `Website-Release` artifact and that the expected files are present before rerunning the promotion pipeline.

@@ -1,0 +1,33 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  SIMULATE_HEALTH_FAILURE: 'false'
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      echo "Starting deployment safety validation"
+      echo "Checking required release files"
+
+      test -f Day-08-2026-10-21-Artifact-Versioning-and-Promotion/README.md
+      if [ $? -ne 0 ]; then
+        echo "ERROR: Day 8 release documentation is missing."
+        exit 1
+      fi
+
+      echo "Release documentation check passed"
+    displayName: 'Validate release files'
+
+  - script: |
+      if [ "$SIMULATE_HEALTH_FAILURE" = "true" ]; then
+        echo "ERROR: Simulated health check failed."
+        exit 1
+      fi
+
+      echo "Health check passed"
+    displayName: 'Run health check'
