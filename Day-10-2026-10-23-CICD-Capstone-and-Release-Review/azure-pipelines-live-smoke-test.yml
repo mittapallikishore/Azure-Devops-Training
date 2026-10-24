@@ -1,0 +1,34 @@
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      set -eu
+
+      URL="https://azurewebapp1-fga9agfwc8gce7ab.indiasouthcentral-01.azurewebsites.net"
+
+      echo "Checking Azure App Service..."
+      STATUS=$(curl --silent --show-error --location \
+        --output /dev/null \
+        --write-out "%{http_code}" \
+        --max-time 30 "$URL") || {
+          echo "ERROR: Could not reach Azure App Service."
+          exit 1
+        }
+
+      echo "HTTP status: $STATUS"
+
+      if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+        echo "PASS: Azure App Service smoke test succeeded."
+      else
+        echo "ERROR: Unexpected HTTP status: $STATUS"
+        exit 1
+      fi
+    displayName: 'Smoke-test live Azure App Service'
