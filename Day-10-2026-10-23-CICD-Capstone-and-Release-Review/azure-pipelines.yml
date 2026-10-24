@@ -10,7 +10,7 @@ variables:
 
 stages:
   - stage: Validate
-    displayName: 'Pull Request and Build Validation'
+    displayName: 'Build and Validate'
     jobs:
       - job: BuildAndTest
         displayName: 'Install, Build and Test'
@@ -24,35 +24,53 @@ stages:
             displayName: 'Set up Node.js'
 
           - script: |
+              cd "$(Build.SourcesDirectory)/azure-website-project"
+
               if [ -f package-lock.json ]; then
                 npm ci
               elif [ -f package.json ]; then
                 npm install
               else
-                echo "ERROR: No package.json found in repository root."
+                echo "ERROR: package.json not found in azure-website-project."
                 exit 1
               fi
             displayName: 'Install dependencies'
 
           - script: |
+              cd "$(Build.SourcesDirectory)/azure-website-project"
+
               if [ -f package.json ]; then
                 npm run build --if-present
                 npm test --if-present
               fi
-            displayName: 'Build and test application'
+            displayName: 'Build and test website'
 
           - script: |
-              mkdir -p "$(Build.ArtifactStagingDirectory)/release"
-              cp -R "$(Build.SourcesDirectory)/." "$(Build.ArtifactStagingDirectory)/release/"
-              printf "Build ID: %s\nCommit: %s\n" "$(Build.BuildId)" "$(Build.SourceVersion)" > "$(Build.ArtifactStagingDirectory)/release/release-info.txt"
-            displayName: 'Prepare release artifact'
+              APP_DIR="$(Build.SourcesDirectory)/azure-website-project"
+              RELEASE_DIR="$(Build.ArtifactStagingDirectory)/release"
+
+              if [ ! -d "$APP_DIR" ]; then
+                echo "ERROR: azure-website-project folder not found."
+                exit 1
+              fi
+
+              mkdir -p "$RELEASE_DIR"
+              cp -R "$APP_DIR/." "$RELEASE_DIR/"
+
+              printf "Build ID: %s\nCommit: %s\n" \
+                "$(Build.BuildId)" "$(Build.SourceVersion)" \
+                > "$RELEASE_DIR/release-info.txt"
+
+              echo "Website release artifact prepared."
+              echo "Training documentation folders were excluded."
+            displayName: 'Prepare website-only artifact'
 
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(Build.ArtifactStagingDirectory)/release'
               artifact: 'Website-Release'
               publishLocation: 'pipeline'
-            displayName: 'Publish release artifact'
+            displayName: 'Publish website artifact'
 
   - stage: DeploymentGate
     displayName: 'Deployment Approval Gate'
@@ -70,5 +88,5 @@ stages:
               notifyUsers: ''
               approvers: ''
               allowApproversToApproveTheirOwnRuns: true
-              instructions: 'Review the successful validation run and published Website-Release artifact. Approve only when ready to continue.'
+              instructions: 'Review the successful validation run and Website-Release artifact before approving.'
               onTimeout: 'reject'
