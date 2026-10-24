@@ -47,3 +47,22 @@ A starter deployment-safety validation pipeline has been created. Actual deploym
 2. Fix the missing file or restore the health-check setting.
 3. Rerun validation.
 4. For a real deployment, redeploy the last known-good artifact and verify the application health endpoint.
+
+
+## Recovery and Rollback Plan
+
+1. Open the failed Azure DevOps pipeline run and inspect the logs.
+2. Identify the failing validation or health-check step.
+3. Correct the problem and rerun the validation pipeline.
+4. If a real deployment causes problems, redeploy the last known-good published artifact.
+5. Run the application health check after redeployment.
+6. Confirm the application is healthy before considering recovery complete.
+
+### Security and Permissions
+
+- Store credentials in Azure DevOps secret variables or service connections.
+- Never commit passwords, tokens, or other secrets to Git.
+- Do not print secret values in pipeline logs.
+- Restrict deployment permissions to authorized users and environments.
+
+**Limitation:** The current Day 9 pipelines test validation and simulated failure. Actual deployment, secret-backed service connections, and rollback execution still need a configured deployment environment.
