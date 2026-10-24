@@ -1,0 +1,47 @@
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-24.04
+
+resources:
+  pipelines:
+    - pipeline: buildPipeline
+      source: REPLACE_WITH_YOUR_BUILD_PIPELINE_NAME
+      trigger: none
+
+stages:
+  - stage: Test
+    displayName: Test Environment
+    jobs:
+      - job: ValidateTestArtifact
+        steps:
+          - download: buildPipeline
+            artifact: Website-Release
+
+          - script: |
+              echo "Validating artifact in Test environment"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/index.html"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/server.js"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
+              cat "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
+            displayName: Verify release files
+
+  - stage: Production
+    displayName: Production Environment
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: ValidateProductionArtifact
+        steps:
+          - download: buildPipeline
+            artifact: Website-Release
+
+          - script: |
+              echo "Validating the same artifact in Production"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/index.html"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/server.js"
+              test -f "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
+              cat "$(Pipeline.Workspace)/buildPipeline/Website-Release/release-info.txt"
+            displayName: Verify promoted release
