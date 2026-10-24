@@ -11,8 +11,21 @@ Improve pipeline safety by validating release files, checking health status, dia
 5. **Secret management:** No secrets are hardcoded or printed. Real deployment credentials should be stored securely in Azure DevOps secret variables or service connections.
 6. **Recovery plan:** If validation fails, investigate the logs and rerun after fixing the issue. For a real deployment, redeploy the last known-good artifact and verify application health.
 
+
 ## Failure Test
-Set `SIMULATE_HEALTH_FAILURE` to `true` in the pipeline YAML and run the pipeline to confirm that the health-check step fails with a clear message. Restore it to `false` and rerun to confirm success.
+
+A separate `azure-pipelines-failure.yml` file was created to simulate a health-check failure without modifying the successful `azure-pipelines.yml` pipeline.
+
+The failure pipeline was executed in Azure DevOps and failed at the `Simulate health-check failure` step as expected. The logs displayed the intentional failure message and diagnosis.
+
+The normal pipeline remains separate and can be run independently.
+
+## Test Results
+
+- Normal validation pipeline: Succeeded.
+- Simulated health-check failure pipeline: Failed as expected.
+- Failure logs: Verified.
+
 
 ## Observations
 - Clean checkout helps avoid using stale workspace files.
