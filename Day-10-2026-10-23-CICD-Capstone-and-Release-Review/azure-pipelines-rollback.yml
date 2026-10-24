@@ -1,0 +1,33 @@
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      set -eu
+
+      echo "Starting rollback readiness validation."
+
+      APP_DIR="$(Build.SourcesDirectory)/azure-website-project"
+
+      if [ ! -f "$APP_DIR/index.html" ]; then
+        echo "ERROR: Website entry file is missing."
+        exit 1
+      fi
+
+      if [ ! -f "Day-08-2026-10-21-Artifact-Versioning-and-Promotion/README.md" ]; then
+        echo "ERROR: Previous release documentation is missing."
+        exit 1
+      fi
+
+      echo "PASS: Website entry file exists."
+      echo "PASS: Previous release documentation exists."
+      echo "Rollback readiness checks passed."
+      echo "NOTE: No deployment or live rollback was performed."
+    displayName: 'Validate rollback readiness'
