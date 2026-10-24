@@ -1,0 +1,27 @@
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    clean: true
+
+  - script: |
+      echo "Starting deployment safety failure test"
+      echo "Checking release files"
+
+      test -f Day-08-2026-10-21-Artifact-Versioning-and-Promotion/README.md || {
+        echo "ERROR: Release documentation is missing."
+        exit 1
+      }
+
+      echo "Release file check passed"
+    displayName: 'Validate release files'
+
+  - script: |
+      echo "ERROR: Simulated health check failed."
+      echo "Diagnosis: This failure is intentional for testing."
+      exit 1
+    displayName: 'Simulate health-check failure'
