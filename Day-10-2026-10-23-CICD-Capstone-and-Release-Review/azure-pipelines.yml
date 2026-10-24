@@ -1,0 +1,74 @@
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20'
+
+stages:
+  - stage: Validate
+    displayName: 'Pull Request and Build Validation'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Install, Build and Test'
+        steps:
+          - checkout: self
+            clean: true
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(NODE_VERSION)'
+            displayName: 'Set up Node.js'
+
+          - script: |
+              if [ -f package-lock.json ]; then
+                npm ci
+              elif [ -f package.json ]; then
+                npm install
+              else
+                echo "ERROR: No package.json found in repository root."
+                exit 1
+              fi
+            displayName: 'Install dependencies'
+
+          - script: |
+              if [ -f package.json ]; then
+                npm run build --if-present
+                npm test --if-present
+              fi
+            displayName: 'Build and test application'
+
+          - script: |
+              mkdir -p "$(Build.ArtifactStagingDirectory)/release"
+              cp -R "$(Build.SourcesDirectory)/." "$(Build.ArtifactStagingDirectory)/release/"
+              printf "Build ID: %s\nCommit: %s\n" "$(Build.BuildId)" "$(Build.SourceVersion)" > "$(Build.ArtifactStagingDirectory)/release/release-info.txt"
+            displayName: 'Prepare release artifact'
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/release'
+              artifact: 'Website-Release'
+              publishLocation: 'pipeline'
+            displayName: 'Publish release artifact'
+
+  - stage: DeploymentGate
+    displayName: 'Deployment Approval Gate'
+    dependsOn: Validate
+    condition: succeeded()
+    jobs:
+      - job: Approval
+        displayName: 'Manual approval before deployment'
+        pool: server
+        timeoutInMinutes: 1440
+        steps:
+          - task: ManualValidation@1
+            timeoutInMinutes: 1440
+            inputs:
+              notifyUsers: ''
+              approvers: ''
+              allowApproversToApproveTheirOwnRuns: true
+              instructions: 'Review the successful validation run and published Website-Release artifact. Approve only when ready to continue.'
+              onTimeout: 'reject'
