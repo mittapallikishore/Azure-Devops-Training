@@ -8,7 +8,7 @@ pool:
 resources:
   pipelines:
     - pipeline: buildPipeline
-      source: REPLACE_WITH_YOUR_BUILD_PIPELINE_NAME
+      source: 'Day-08-Build'
       trigger: none
 
 stages:
