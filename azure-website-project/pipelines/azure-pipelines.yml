@@ -1,70 +1,97 @@
 
-trigger:
-  branches:
-    include:
+name: Build and deploy Node.js app to Azure Web App - azurewebapp1
+
+on:
+  push:
+    branches:
       - main
-  paths:
-    include:
-      - azure-website-project/**
+    paths:
+      - 'azure-website-project/**'
+      - '.github/workflows/main_azurewebapp1.yml'
+  workflow_dispatch:
 
-pool:
-  vmImage: ubuntu-24.04
+permissions:
+  contents: read
 
-steps:
-  - checkout: self
+env:
+  NODE_VERSION: '22.x'
+  APP_DIRECTORY: azure-website-project
+  AZURE_WEBAPP_NAME: azurewebapp1
 
-  - task: UseNode@1
-    displayName: Install Node.js
-    inputs:
-      version: '20.x'
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  - script: npm ci
-    displayName: Install dependencies
-    workingDirectory: $(Build.SourcesDirectory)/azure-website-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - script: npm test
-    displayName: Run website quality tests
-    workingDirectory: $(Build.SourcesDirectory)/azure-website-project
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: azure-website-project/package-lock.json
 
-  - task: PublishBuildArtifacts@1
-    displayName: Publish website artifact
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/azure-website-project'
-      ArtifactName: website
-      publishLocation: Container
+      - name: Install dependencies
+        working-directory: azure-website-project
+        run: npm ci
 
+      - name: Run tests
+        working-directory: azure-website-project
+        run: npm test
 
-  - task: Bash@3
-    displayName: Verify deployed website health
-    inputs:
-      targetType: inline
-      script: |
-        echo "Starting health-check verification..."
+      - name: Prepare deployment package
+        run: |
+          mkdir -p release-package
+          cp -a azure-website-project/. release-package/
+          rm -rf release-package/node_modules
+          zip -qr website-${GITHUB_SHA}.zip release-package
 
-        if [ "${SIMULATE_HEALTH_FAILURE:-false}" = "true" ]; then
-          echo "ERROR: Deliberate health-check failure requested."
-          echo "DIAGNOSTIC: Failure simulation is enabled."
-          exit 1
-        fi
+      - name: Upload versioned release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-${{ github.sha }}
+          path: website-${{ github.sha }}.zip
+          if-no-files-found: error
+          retention-days: 30
 
-        if [ -z "${HEALTH_URL:-}" ]; then
-          echo "ERROR: HEALTH_URL is not configured."
-          exit 1
-        fi
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
 
-        response=$(curl --silent --show-error --fail \
-          --max-time 10 "$HEALTH_URL") || {
-          echo "ERROR: Health endpoint request failed."
-          exit 1
-        }
+    steps:
+      - name: Download validated release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: website-${{ github.sha }}
 
-        echo "$response" | grep -q '"status"[[:space:]]*:[[:space:]]*"healthy"' || {
-          echo "ERROR: Health endpoint did not report healthy."
-          exit 1
-        }
+      - name: Extract deployment package
+        run: |
+          unzip -q website-${GITHUB_SHA}.zip
+          cd release-package
+          zip -qr ../website-deploy.zip .
 
-        echo "SUCCESS: Website health check passed."
-    env:
-      HEALTH_URL: $(HEALTH_URL)
-      SIMULATE_HEALTH_FAILURE: $(SIMULATE_HEALTH_FAILURE)
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_44EDB832A0A44564B013791D0E86F044 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E0CAF0663280417BAECF003BD5C895B8 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_890EDB72D6114D2C95E45D313D9EC478 }}
 
+      - name: Deploy validated package
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: Production
+          package: website-deploy.zip
+
+      - name: Verify deployed website
+        run: |
+          URL="https://azurewebapp1-fga9agfwc8gce7ab.indiasouthcentral-01.azurewebsites.net"
+          curl --fail --silent --show-error --location \
+            --max-time 30 "$URL" -o response.html
+          grep -qi '<html' response.html
+          echo "Deployment smoke test passed."
