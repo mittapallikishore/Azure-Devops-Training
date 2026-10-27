@@ -102,3 +102,7 @@ docker rm day11-app
 ```
 
 The local Docker image remains available after removing the container.
+
+## Summary
+
+On Day 11 (27 October 2026), I containerized a Node.js web application using Docker. I created a production-conscious `Dockerfile` and `.dockerignore` to build the application efficiently, exclude unnecessary files, and avoid including sensitive configuration. I built and ran the Docker image, verified the website and `/health` endpoint, and checked the container health status. I also applied version-specific and Git-commit-based image tags and created an `image-provenance.txt` file to record build details and support traceability. Finally, I documented the implementation and added the Day 11 project to the Azure-Devops-Training GitHub repository.
