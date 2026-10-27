@@ -72,7 +72,7 @@ The image has a base tag, a build-specific tag, and a Git-commit tag.
 docker images day11-containerized-app
 ```
 
-The build tag used for this exercise is `day11-2026-10-27-001`. The commit tag records the short Git commit identifier.
+The build tag used for this exercise is `day11-2026-10-27-001`. The commit tag records the full Git commit identifier used for this Day 11 source version: 80ae0f510b6bfd80a683f1cfa71a2fd5ea60aac2.
 
 The `image-provenance.txt` file records the build information for traceability. These are local Docker image tags; publishing to a container registry is a separate step.
 
