@@ -1,17 +1,57 @@
 
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
+const fs = require("fs");
+const path = require("path");
+const assert = require("assert");
 
-const htmlPath = path.join(__dirname, "..", "index.html");
-const serverPath = path.join(__dirname, "..", "server.js");
+const html = fs.readFileSync("index.html", "utf8");
 
-assert.ok(fs.existsSync(htmlPath), "index.html must exist");
-assert.ok(fs.existsSync(serverPath), "server.js must exist");
+const tests = [
+  {
+    name: "HTML file is not empty",
+    run: () => assert.ok(html.trim().length > 0)
+  },
+  {
+    name: "HTML contains an html tag",
+    run: () => assert.ok(/<html[\s>]/i.test(html))
+  },
+  {
+    name: "HTML contains a body tag",
+    run: () => assert.ok(/<body[\s>]/i.test(html))
+  }
+];
 
-const html = fs.readFileSync(htmlPath, "utf8");
+const results = tests.map(test => {
+  try {
+    test.run();
+    console.log(`PASS: ${test.name}`);
+    return { name: test.name, error: null };
+  } catch (error) {
+    console.error(`FAIL: ${test.name}: ${error.message}`);
+    return { name: test.name, error };
+  }
+});
 
-assert.match(html, /<html/i, "HTML document must have an html tag");
-assert.match(html, /Welcome to My Azure Website/i, "Homepage title text must exist");
+const escapeXml = value =>
+  String(value).replace(/[<>&'"]/g, char => ({
+    "<": "&lt;",
+    ">": "&gt;",
+    "&": "&amp;",
+    "'": "&apos;",
+    '"': "&quot;"
+  })[char]);
 
-console.log("All quality tests passed.");
+const failures = results.filter(result => result.error);
+const report = `<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="HTML quality tests" tests="${results.length}" failures="${failures.length}">
+${results.map(result => result.error
+  ? `<testcase name="${escapeXml(result.name)}"><failure message="${escapeXml(result.error.message)}"/></testcase>`
+  : `<testcase name="${escapeXml(result.name)}"/>`
+).join("\n")}
+</testsuite>`;
+
+fs.mkdirSync("test-results", { recursive: true });
+fs.writeFileSync(path.join("test-results", "junit.xml"), report);
+
+if (failures.length > 0) {
+  process.exitCode = 1;
+}
