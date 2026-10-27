@@ -1,12 +1,9 @@
 
 {
-  "name": "azure-website-project",
+  "name": "demo-website",
   "version": "1.0.0",
-  "description": "Node.js website with Azure DevOps CI/CD",
   "private": true,
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
     "test": "node tests/quality.test.js"
   }
 }
