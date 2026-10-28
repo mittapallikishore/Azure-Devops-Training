@@ -54,8 +54,10 @@ stages:
       inputs:
         version: '22.x'
 
-    - script: node "$(Build.SourcesDirectory)/Day-12-2026-10-28-Automated-CI-Validation-and-Registry-Publishing/tests/run-tests-with-junit.js"
+        - script: node "$(Build.SourcesDirectory)/Day-12-2026-10-28-Automated-CI-Validation-and-Registry-Publishing/tests/run-tests-with-junit.js"
       displayName: 'Run quality tests and generate JUnit XML'
+      env:
+        DAY12_FORCE_TEST_FAILURE: $(DAY12_FORCE_TEST_FAILURE)
 
     - task: PublishTestResults@2
       displayName: 'Publish JUnit test results'
