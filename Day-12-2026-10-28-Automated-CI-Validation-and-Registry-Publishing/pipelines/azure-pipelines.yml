@@ -112,7 +112,7 @@ stages:
 - stage: ImagePublication
   displayName: '4. Publish Image (Sandbox Simulation)'
   dependsOn: ImageBuild
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: succeeded()
   jobs:
   - job: SimulatePublication
     pool:
