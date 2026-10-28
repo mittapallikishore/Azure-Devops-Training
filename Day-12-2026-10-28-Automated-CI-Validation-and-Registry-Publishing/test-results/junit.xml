@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="0" errors="0" time="0">
+  <testsuite name="Day 11 Quality Tests" tests="1" failures="0" errors="0" time="0">
+    <testcase classname="quality" name="Existing application quality checks" time="0">
+      
+    </testcase>
+  </testsuite>
+</testsuites>
