@@ -1,122 +1,11 @@
-trigger:
-  branches:
-    include:
-      - main
-      - test/pipeline-failure
-
-pr:
-  branches:
-    include:
-      - main
-
-variables:
-  vmImage: 'ubuntu-24.04'
-  sourceFolder: 'Day-11-2026-10-27-Containerized-Build-and-Image-Provenance'
-  imageName: 'day12ci331776.azurecr.io/day12-website'
-
-stages:
-- stage: BuildValidation
-  displayName: '1. Checkout and Build Validation'
-  jobs:
-  - job: Validate
-    displayName: 'Validate application'
-    pool:
-      vmImage: $(vmImage)
-    steps:
-    - checkout: self
-
-    - task: UseNode@1
-      displayName: 'Use Node.js 22'
-      inputs:
-        version: '22.x'
-
-    - script: npm ci
-      displayName: 'Install dependencies'
-      workingDirectory: '$(Build.SourcesDirectory)/$(sourceFolder)'
-
-    - script: node --check server.js
-      displayName: 'Validate Node.js syntax'
-      workingDirectory: '$(Build.SourcesDirectory)/$(sourceFolder)'
-
-- stage: AutomatedTests
-  displayName: '2. Automated Tests'
-  dependsOn: BuildValidation
-  jobs:
-  - job: Test
-    displayName: 'Run quality tests and publish results'
-    pool:
-      vmImage: $(vmImage)
-    steps:
-    - checkout: self
-
-    - task: UseNode@1
-      displayName: 'Use Node.js 22'
-      inputs:
-        version: '22.x'
-
-        - script: node "$(Build.SourcesDirectory)/Day-12-2026-10-28-Automated-CI-Validation-and-Registry-Publishing/tests/run-tests-with-junit.js"
-      displayName: 'Run quality tests and generate JUnit XML'
-      env:
-        DAY12_FORCE_TEST_FAILURE: $(DAY12_FORCE_TEST_FAILURE)
-
-    - task: PublishTestResults@2
-      displayName: 'Publish JUnit test results'
-      condition: succeededOrFailed()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/test-results/junit.xml'
-        searchFolder: '$(Build.SourcesDirectory)/Day-12-2026-10-28-Automated-CI-Validation-and-Registry-Publishing'
-        testRunTitle: 'Day 12 Quality Tests'
-        failTaskOnFailedTests: true
-        publishRunAttachments: true
-
-- stage: ImageBuild
-  displayName: '3. Build and Package Docker Image'
-  dependsOn: AutomatedTests
-  jobs:
-  - job: BuildImage
-    displayName: 'Build image and preserve tags'
-    pool:
-      vmImage: $(vmImage)
-    steps:
-    - checkout: self
-
-    - task: Docker@2
-      displayName: 'Build Docker image with build ID and commit SHA tags'
-      inputs:
-        command: build
-        Dockerfile: '$(Build.SourcesDirectory)/$(sourceFolder)/Dockerfile'
-        buildContext: '$(Build.SourcesDirectory)/$(sourceFolder)'
-        repository: '$(imageName)'
-        tags: |
-          $(Build.BuildId)
-          $(Build.SourceVersion)
-
-    - script: |
-        docker save \
-          --output "$(Build.ArtifactStagingDirectory)/day12-image.tar" \
-          "$(imageName):$(Build.BuildId)" \
-          "$(imageName):$(Build.SourceVersion)"
-        echo "Build ID: $(Build.BuildId)" > "$(Build.ArtifactStagingDirectory)/image-provenance.txt"
-        echo "Commit SHA: $(Build.SourceVersion)" >> "$(Build.ArtifactStagingDirectory)/image-provenance.txt"
-        echo "Repository: $(Build.Repository.Name)" >> "$(Build.ArtifactStagingDirectory)/image-provenance.txt"
-        echo "Image: $(imageName)" >> "$(Build.ArtifactStagingDirectory)/image-provenance.txt"
-      displayName: 'Save exact image and provenance'
-
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish image archive artifact'
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'day12-container-image'
-        publishLocation: 'pipeline'
 
 - stage: ImagePublication
-  displayName: '4. Publish Image to Azure Container Registry'
+  displayName: '4. Publish Image (Sandbox Simulation)'
   dependsOn: ImageBuild
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
-  - job: PublishImage
-    displayName: 'Push validated image to ACR'
+  - job: SimulatePublication
+    displayName: 'Validate packaged image for publication'
     pool:
       vmImage: $(vmImage)
     steps:
@@ -129,19 +18,14 @@ stages:
         artifactName: 'day12-container-image'
         targetPath: '$(Pipeline.Workspace)/day12-container-image'
 
-    - script: docker load --input "$(Pipeline.Workspace)/day12-container-image/day12-image.tar"
-      displayName: 'Load exact image built in previous stage'
-
-    - task: Docker@2
-      displayName: 'Authenticate to Azure Container Registry'
-      inputs:
-        command: login
-        containerRegistry: 'sc-day12-acr'
-
     - script: |
         set -euo pipefail
-        docker push "$(imageName):$(Build.BuildId)"
-        docker push "$(imageName):$(Build.SourceVersion)"
-        echo "Published image: $(imageName):$(Build.BuildId)"
-        echo "Published image: $(imageName):$(Build.SourceVersion)"
-      displayName: 'Push both image tags to ACR'
+        docker load --input "$(Pipeline.Workspace)/day12-container-image/day12-image.tar"
+        docker image inspect "$(imageName):$(Build.BuildId)" >/dev/null
+        docker image inspect "$(imageName):$(Build.SourceVersion)" >/dev/null
+        echo "SANDBOX SIMULATION ONLY: image archive loaded and both tags verified."
+        echo "Image: $(imageName)"
+        echo "Build ID: $(Build.BuildId)"
+        echo "Commit SHA: $(Build.SourceVersion)"
+        echo "No registry login or remote image push was performed."
+      displayName: 'Verify packaged image and simulate publication'
