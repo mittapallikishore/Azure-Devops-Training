@@ -64,6 +64,46 @@ The pipeline tags images using the Azure DevOps build ID and source commit SHA. 
 
 \- The ACR authentication issue remains open and must be resolved before production use.
 
+## Pipeline Validation and Sandbox Publication
+
+
+
+\### Pipeline Stages
+
+1\. \*\*Build Validation:\*\* Checks out the source code, installs dependencies, and validates the application.
+
+2\. \*\*Automated Tests:\*\* Runs automated tests and publishes JUnit test results.
+
+3\. \*\*Image Build:\*\* Builds a Docker image and tags it using the Azure DevOps build ID and source commit SHA.
+
+4\. \*\*Sandbox Publication:\*\* Downloads the image artifact, loads the image, and validates its tags without pushing to an external registry.
+
+
+
+\### Failure-Gate Validation
+
+A deliberate test failure was triggered during Azure DevOps run #234. The automated test stage failed, and the image build and publication stages were skipped. This verified that failed tests block downstream image processing.
+
+
+
+\### Registry Status
+
+The sandbox workflow validates the image artifact and its tags locally. Actual image publication to Azure Container Registry (ACR) remains pending because registry authentication has not been configured successfully.
+
+
+
+\### Security
+
+The sandbox workflow does not require registry credentials. No registry secrets are embedded in the image or printed in pipeline logs.
+
+
+
+\### Result
+
+The pipeline is configured to validate code, execute automated tests, build a traceable container image, and prevent publication steps from proceeding when prerequisite stages fail.
+
+
+
 
 
 \## Conclusion
