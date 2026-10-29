@@ -1,0 +1,4 @@
+Health check: PASSED
+URL: https://day13-deploy-sandbox-20261029.azurewebsites.net/health
+Time: 2026-10-29T11:47:42.5501227+05:30
+Response: {"status":"healthy"}
