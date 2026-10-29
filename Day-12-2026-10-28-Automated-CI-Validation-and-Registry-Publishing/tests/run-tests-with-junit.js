@@ -1,4 +1,5 @@
-﻿const { spawnSync } = require("node:child_process");
+﻿
+const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -12,6 +13,7 @@ const testScript = path.join(
 
 const resultsDir = path.join(__dirname, "..", "test-results");
 const resultsFile = path.join(resultsDir, "junit.xml");
+const forceFailure = process.env.DAY12_FORCE_TEST_FAILURE === "true";
 
 function xmlEscape(value) {
   return String(value)
@@ -29,10 +31,18 @@ const result = spawnSync(process.execPath, [testScript], {
 });
 
 const output = `${result.stdout || ""}${result.stderr || ""}`;
-const failed = result.error || result.status !== 0;
+const testFailed = Boolean(result.error) || result.status !== 0;
+const failed = testFailed || forceFailure;
+
 const failureDetails = result.error
   ? result.error.message
-  : output || `Test process exited with code ${result.status}`;
+  : testFailed
+    ? output || `Test process exited with code ${result.status}`
+    : forceFailure
+      ? "Deliberate failure requested by DAY12_FORCE_TEST_FAILURE."
+      : "";
+
+if (output) process.stdout.write(output);
 
 const failureXml = failed
   ? `<failure message="Quality tests failed">${xmlEscape(failureDetails)}</failure>`
@@ -40,8 +50,8 @@ const failureXml = failed
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="${failed ? 1 : 0}" errors="0" time="0">
-  <testsuite name="Day 11 Quality Tests" tests="1" failures="${failed ? 1 : 0}" errors="0" time="0">
-    <testcase classname="quality" name="Existing application quality checks" time="0">
+  <testsuite name="Day 12 Quality Tests" tests="1" failures="${failed ? 1 : 0}" errors="0" time="0">
+    <testcase classname="quality" name="Application quality checks" time="0">
       ${failureXml}
     </testcase>
   </testsuite>
@@ -50,7 +60,11 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 
 fs.writeFileSync(resultsFile, xml, "utf8");
 
-if (output) process.stdout.write(output);
-console.log(`JUnit results written to ${resultsFile}`);
+console.log(`JUnit results written to: ${resultsFile}`);
 
-if (failed) process.exit(1);
+if (failed) {
+  console.error(`Quality test stage failed: ${failureDetails}`);
+  process.exitCode = 1;
+} else {
+  console.log("Quality tests passed.");
+}
