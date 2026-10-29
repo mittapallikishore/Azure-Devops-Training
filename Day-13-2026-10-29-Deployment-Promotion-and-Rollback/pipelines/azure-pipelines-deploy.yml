@@ -1,4 +1,4 @@
-﻿trigger: none
+trigger: none
 pr: none
 
 parameters:
@@ -8,7 +8,7 @@ parameters:
   default: 'sha256:01f37f378dea6898f605c9de5aac4b0ef9d6f6498683b74eb46944ddb5d53416'
 
 variables:
-  azureServiceConnection: 'REPLACE-WITH-YOUR-AZURE-SERVICE-CONNECTION'
+  azureServiceConnection: 'day13-sandbox-connection'
   resourceGroup: 'azurewebapp1_group'
   appName: 'day13-deploy-sandbox-20261029'
   registry: 'day12ci331776.azurecr.io'
@@ -82,3 +82,4 @@ stages:
               filePath: '$(Build.SourcesDirectory)/Day-13-2026-10-29-Deployment-Promotion-and-Rollback/scripts/smoke-test.ps1'
               arguments: '-HealthUrl "$(healthUrl)" -MaxAttempts 6 -DelaySeconds 10'
               pwsh: true
+
