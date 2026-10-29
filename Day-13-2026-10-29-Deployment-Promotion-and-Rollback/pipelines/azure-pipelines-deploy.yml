@@ -1,3 +1,4 @@
+
 trigger: none
 pr: none
 
@@ -14,6 +15,7 @@ variables:
   registry: 'day12ci331776.azurecr.io'
   imageRepository: 'day12-website'
   healthUrl: 'https://day13-deploy-sandbox-20261029.azurewebsites.net/health'
+  previousImageDigest: 'sha256:4463ebf2b60242965c593ddaf04cd3d41ab2af0d7d4663b1824e59a6f8902d61'
 
 stages:
 - stage: Validate
@@ -24,12 +26,15 @@ stages:
       vmImage: ubuntu-24.04
     steps:
     - checkout: self
+
     - bash: |
         set -euo pipefail
+
         if [[ ! "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
           echo "##vso[task.logissue type=error]A valid immutable SHA-256 digest is required."
           exit 1
         fi
+
         echo "Validated immutable image digest: $IMAGE_DIGEST"
       displayName: Validate immutable image digest
       env:
@@ -39,17 +44,20 @@ stages:
   displayName: Deploy to Day 13 sandbox
   dependsOn: Validate
   condition: succeeded()
+
   jobs:
   - deployment: DeployImage
-    displayName: Deploy existing image
+    displayName: Deploy and verify container image
     environment: day13-sandbox
     pool:
       vmImage: ubuntu-24.04
+
     strategy:
       runOnce:
         deploy:
           steps:
           - checkout: self
+
           - task: AzureCLI@2
             displayName: Configure sandbox container image
             inputs:
@@ -58,14 +66,15 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 set -euo pipefail
+
                 IMAGE="$(registry)/$(imageRepository)@${IMAGE_DIGEST}"
                 echo "Deploying immutable image: $IMAGE"
 
                 az webapp config set \
- 		 --resource-group "$(resourceGroup)" \
-		 --name "$(appName)" \
-  		 --linux-fx-version "DOCKER|$IMAGE" \
- 		 --output none
+                  --resource-group "$(resourceGroup)" \
+                  --name "$(appName)" \
+                  --linux-fx-version "DOCKER|$IMAGE" \
+                  --output none
 
                 az webapp restart \
                   --resource-group "$(resourceGroup)" \
@@ -83,3 +92,40 @@ stages:
               arguments: '-HealthUrl "$(healthUrl)" -MaxAttempts 6 -DelaySeconds 10'
               pwsh: true
 
+          - task: AzureCLI@2
+            displayName: Roll back to previous image on failure
+            condition: failed()
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+
+                ROLLBACK_IMAGE="$(registry)/$(imageRepository)@$(previousImageDigest)"
+
+                echo "Rolling back to previous known-good image: $ROLLBACK_IMAGE"
+
+                az webapp config set \
+                  --resource-group "$(resourceGroup)" \
+                  --name "$(appName)" \
+                  --linux-fx-version "DOCKER|$ROLLBACK_IMAGE" \
+                  --output none
+
+                az webapp restart \
+                  --resource-group "$(resourceGroup)" \
+                  --name "$(appName)"
+
+                for attempt in {1..6}; do
+                  if response="$(curl -fsS "$(healthUrl)")" &&
+                     [[ "$response" == *'"healthy"'* ]]; then
+                    echo "Rollback health check passed: $response"
+                    exit 0
+                  fi
+
+                  echo "Waiting for rollback health check ($attempt/6)..."
+                  sleep 10
+                done
+
+                echo "##vso[task.logissue type=error]Rollback health check failed."
+                exit 1
