@@ -67,3 +67,19 @@ The `/health` endpoint must return a successful response after deployment and ro
 - No registry passwords are stored in the README.
 - The existing `azurewebapp1` application was left unchanged.
 
+
+## Completion Summary — 29 October 2026
+
+- [x] Deployed the previously published container image by immutable digest without rebuilding it.
+- [x] Configured ACR image pulls using a system-assigned managed identity and `AcrPull` permission.
+- [x] Verified the deployed image digest against the registry manifest.
+- [x] Rolled back the sandbox to the previous known-good image digest and restarted the application.
+- [x] Verified the rollback configuration after restart.
+- [x] Confirmed the `/health` endpoint returned `{"status":"healthy"}` after rollback.
+- [x] Saved rollback and health-check evidence under `evidence/`.
+
+**Result:** Deployment and rollback were demonstrated in the sandbox. The post-rollback health check passed.
+
+**Remaining validation:** Confirm the GitHub push and review the pipeline YAML for environment approval gates and deployment/health-check failure handling before claiming every pipeline acceptance criterion is complete.
+
+

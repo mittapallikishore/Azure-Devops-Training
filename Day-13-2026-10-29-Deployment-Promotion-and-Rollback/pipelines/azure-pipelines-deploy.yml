@@ -1,0 +1,84 @@
+﻿trigger: none
+pr: none
+
+parameters:
+- name: imageDigest
+  displayName: Immutable image digest to deploy
+  type: string
+  default: 'sha256:01f37f378dea6898f605c9de5aac4b0ef9d6f6498683b74eb46944ddb5d53416'
+
+variables:
+  azureServiceConnection: 'REPLACE-WITH-YOUR-AZURE-SERVICE-CONNECTION'
+  resourceGroup: 'azurewebapp1_group'
+  appName: 'day13-deploy-sandbox-20261029'
+  registry: 'day12ci331776.azurecr.io'
+  imageRepository: 'day12-website'
+  healthUrl: 'https://day13-deploy-sandbox-20261029.azurewebsites.net/health'
+
+stages:
+- stage: Validate
+  displayName: Validate deployment input
+  jobs:
+  - job: ValidateImage
+    pool:
+      vmImage: ubuntu-24.04
+    steps:
+    - checkout: self
+    - bash: |
+        set -euo pipefail
+        if [[ ! "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+          echo "##vso[task.logissue type=error]A valid immutable SHA-256 digest is required."
+          exit 1
+        fi
+        echo "Validated immutable image digest: $IMAGE_DIGEST"
+      displayName: Validate immutable image digest
+      env:
+        IMAGE_DIGEST: ${{ parameters.imageDigest }}
+
+- stage: DeploySandbox
+  displayName: Deploy to Day 13 sandbox
+  dependsOn: Validate
+  condition: succeeded()
+  jobs:
+  - deployment: DeployImage
+    displayName: Deploy existing image
+    environment: day13-sandbox
+    pool:
+      vmImage: ubuntu-24.04
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: Configure sandbox container image
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                IMAGE="$(registry)/$(imageRepository)@${IMAGE_DIGEST}"
+                echo "Deploying immutable image: $IMAGE"
+
+                az webapp config set \
+                  --resource-group "$(resourceGroup)" \
+                  --name "$(appName)" \
+                  --container-image-name "$IMAGE" \
+                  --output none
+
+                az webapp restart \
+                  --resource-group "$(resourceGroup)" \
+                  --name "$(appName)"
+
+                echo "##vso[task.setvariable variable=deployedImage]$IMAGE"
+            env:
+              IMAGE_DIGEST: ${{ parameters.imageDigest }}
+
+          - task: PowerShell@2
+            displayName: Smoke test deployed application
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/Day-13-2026-10-29-Deployment-Promotion-and-Rollback/scripts/smoke-test.ps1'
+              arguments: '-HealthUrl "$(healthUrl)" -MaxAttempts 6 -DelaySeconds 10'
+              pwsh: true
