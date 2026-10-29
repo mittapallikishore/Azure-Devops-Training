@@ -136,3 +136,21 @@ The CI validation, automated testing, Docker image build, and artifact publicati
 - Registry authentication uses the configured Azure DevOps service connection `sc-day12-acr`.
 - Credentials should remain in secure service connections or secret variables and must not be printed in logs.
 
+
+## Final Validation Status
+
+- **CI pipeline:** Successful run completed.
+- **Build validation:** Confirmed through the successful pipeline run.
+- **Automated tests:** Confirm the test stage succeeded in Azure DevOps.
+- **Docker image registry:** `day12ci331776.azurecr.io`
+- **Image repository:** `day12-website`
+- **ACR verification:** Two image manifests were present on 29 October 2026.
+- **Latest verified manifest digest:** `sha256:01f37f378dea6898f605c9de5aac4b0ef9d6f6498683b74eb46944ddb5d53416`
+- **Previous manifest digest:** `sha256:4463ebf2b60242965c593ddaf04cd3d41ab2af0d7d4663b1824e59a6f8902d61`
+
+### Evidence and Security
+
+- Verify the pipeline's stage results and image tag against the successful run before recording final sign-off.
+- Registry authentication is configured through the Azure DevOps service connection.
+- The deliberate test-failure scenario is intended to demonstrate that failed validation blocks publication.
+- Image tags and manifest digests provide evidence for tracing published artifacts.
