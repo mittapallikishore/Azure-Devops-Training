@@ -112,3 +112,27 @@ The pipeline is configured to validate code, execute automated tests, build a tr
 
 The CI validation, automated testing, Docker image build, and artifact publication stages are working. Registry publication is not yet complete because the service connection cannot authenticate to ACR.
 
+
+## Validation Results and Evidence
+
+### Successful CI and Image Publication
+- The Azure DevOps pipeline validates the application and runs automated quality tests.
+- A successful run builds and publishes the Docker image to Azure Container Registry (ACR).
+- Registry: `day12ci331776.azurecr.io`
+- Repository: `day12-website`
+- Verified image tags: `242`, `243`, and source commit SHA `aedaba88f1a0cdafec6383a5e03754482be0da2e`.
+
+### Image Provenance
+- ACR manifest metadata was checked to verify image digests and creation timestamps.
+- Image tag `243` and the source commit SHA resolve to the same digest: `sha256:01f37f378dea6898f605c9de5aac4b0ef9d6f6498683b74eb46944ddb5d53416`.
+- This provides evidence that the image can be traced to its source commit.
+
+### Failure-Gate Validation
+- The test script supports a deliberate failure using `DAY12_FORCE_TEST_FAILURE=true`.
+- A local test confirmed the failure path by returning exit code `1`.
+- An Azure DevOps failure run was performed to validate that unsuccessful tests block subsequent image stages. Confirm the run shows `AutomatedTests` failed and `ImageBuild` and `ImagePublication` skipped before marking this gate fully verified.
+
+### Security
+- Registry authentication uses the configured Azure DevOps service connection `sc-day12-acr`.
+- Credentials should remain in secure service connections or secret variables and must not be printed in logs.
+
