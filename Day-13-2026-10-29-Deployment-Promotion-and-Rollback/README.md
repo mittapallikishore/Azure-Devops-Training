@@ -83,3 +83,17 @@ The `/health` endpoint must return a successful response after deployment and ro
 **Remaining validation:** Confirm the GitHub push and review the pipeline YAML for environment approval gates and deployment/health-check failure handling before claiming every pipeline acceptance criterion is complete.
 
 
+## Deployment and Rollback Validation
+
+- Configured an Azure DevOps deployment pipeline with the `day13-sandbox` environment approval gate.
+- Deployed the container image using an immutable SHA-256 digest.
+- Verified the sandbox App Service container image configuration using Azure CLI.
+- Validated rollback by configuring the sandbox to use the previous known-good image (image 242).
+- Confirmed the application health endpoint returned `healthy`.
+- Saved verification details in `evidence/rollback-evidence.txt`.
+
+**Evidence:** The environment approval gate and pipeline run succeeded. The previous known-good image configuration and health check were verified manually.
+
+**Remaining validation:** Automated rollback after a failed deployment health check has not yet been demonstrated.
+
+
