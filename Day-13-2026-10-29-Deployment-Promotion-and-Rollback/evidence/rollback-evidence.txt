@@ -1,17 +1,8 @@
-Day 13 Deployment and Rollback Evidence
-Date: 2026-10-29
-Sandbox App: day13-deploy-sandbox-20261029
-Resource Group: azurewebapp1_group
-Registry: day12ci331776
-Repository: day12-website
+Verification date: 2026-10-29 13:06:47
+App Service: day13-deploy-sandbox-20261029
+Configured image:
+DOCKER|day12ci331776.azurecr.io/day12-website@sha256:4463ebf2b60242965c593ddaf04cd3d41ab2af0d7d4663b1824e59a6f8902d61
 
-Initial image:
-day12ci331776.azurecr.io/day12-website@sha256:01f37f378dea6898f605c9de5aac4b0ef9d6f6498683b74eb46944ddb5d53416
-
-Rollback image:
-day12ci331776.azurecr.io/day12-website@sha256:4463ebf2b60242965c593ddaf04cd3d41ab2af0d7d4663b1824e59a6f8902d61
-
-Health URL:
-https://day13-deploy-sandbox-20261029.azurewebsites.net/health
-
-Rollback configuration verified after restart.
+Health-check URL: https://day13-deploy-sandbox-20261029.azurewebsites.net/health
+Health-check result: healthy
+Verification time: 2026-10-29 13:07:30
