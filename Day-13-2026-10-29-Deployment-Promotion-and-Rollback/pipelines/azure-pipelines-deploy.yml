@@ -62,10 +62,10 @@ stages:
                 echo "Deploying immutable image: $IMAGE"
 
                 az webapp config set \
-                  --resource-group "$(resourceGroup)" \
-                  --name "$(appName)" \
-                  --container-image-name "$IMAGE" \
-                  --output none
+ 		 --resource-group "$(resourceGroup)" \
+		 --name "$(appName)" \
+  		 --linux-fx-version "DOCKER|$IMAGE" \
+ 		 --output none
 
                 az webapp restart \
                   --resource-group "$(resourceGroup)" \
