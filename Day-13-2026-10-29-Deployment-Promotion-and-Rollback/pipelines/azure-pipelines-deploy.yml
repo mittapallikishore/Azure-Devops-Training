@@ -1,5 +1,8 @@
+trigger:
+  branches:
+    include:
+      - test/pipeline-failure
 
-trigger: none
 pr: none
 
 parameters:
