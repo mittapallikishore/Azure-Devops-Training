@@ -38,6 +38,7 @@ stages:
         echo "Application files validated successfully."
       displayName: 'Validate source files'
 
+
 # STAGE 2: AUTOMATED TESTS
 - stage: AutomatedTests
   displayName: '2. Automated Tests'
@@ -57,6 +58,7 @@ stages:
         npm ci
         npm test
       displayName: 'Install dependencies and run tests'
+
 
 # STAGE 3: BUILD DOCKER IMAGE
 - stage: BuildDockerImage
@@ -89,6 +91,7 @@ stages:
         publishLocation: 'pipeline'
       displayName: 'Publish image artifact'
 
+
 # STAGE 4: PUBLISH IMAGE TO ACR
 - stage: PublishDockerImage
   displayName: '4. Publish Image to ACR'
@@ -103,6 +106,7 @@ stages:
         targetPath: '$(Pipeline.Workspace)/image'
 
     - bash: |
+        set -e
         docker load \
           -i "$(Pipeline.Workspace)/image/image.tar"
       displayName: 'Load previously built image'
@@ -123,6 +127,7 @@ stages:
         echo "Published image: $IMAGE"
       displayName: 'Push image to ACR'
 
+
 # STAGE 5: DEPLOY TO AZURE APP SERVICE
 - stage: DeployToAppService
   displayName: '5. Deploy to Azure App Service'
@@ -139,6 +144,8 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          set -e
+
           CURRENT_CONFIG=$(az webapp config show \
             --name "$(appName)" \
             --resource-group "$(resourceGroup)" \
@@ -148,7 +155,7 @@ stages:
           PREVIOUS_IMAGE="${CURRENT_CONFIG#DOCKER|}"
 
           if [ -z "$PREVIOUS_IMAGE" ] || [ "$PREVIOUS_IMAGE" = "$CURRENT_CONFIG" ]; then
-            echo "ERROR: No previous Docker image found."
+            echo "ERROR: Previous Docker image could not be identified."
             exit 1
           fi
 
@@ -161,6 +168,7 @@ stages:
         azureSubscription: 'day13-sandbox-connection'
         appName: '$(appName)'
         containers: '$(containerRegistry)/$(imageRepository):$(imageTag)'
+
 
 # STAGE 6: HEALTH CHECK
 - stage: HealthCheck
@@ -175,7 +183,7 @@ stages:
         URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
 
         for attempt in {1..12}; do
-          if curl --fail --silent --show-error "$URL"; then
+          if curl --fail --silent --show-error --max-time 15 "$URL"; then
             echo "Health check passed."
             exit 0
           fi
@@ -187,6 +195,7 @@ stages:
         echo "ERROR: Health check failed."
         exit 1
       displayName: 'Verify deployed application'
+
 
 # STAGE 7: ROLLBACK AND RECOVERY
 - stage: RollbackRecovery
@@ -210,6 +219,8 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          set -e
+
           PREVIOUS_IMAGE="$(previousImage)"
 
           if [ -z "$PREVIOUS_IMAGE" ]; then
@@ -217,7 +228,7 @@ stages:
             exit 1
           fi
 
-          echo "Restoring: $PREVIOUS_IMAGE"
+          echo "Restoring previous image: $PREVIOUS_IMAGE"
 
           az webapp config set \
             --name "$(appName)" \
@@ -231,8 +242,8 @@ stages:
           URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
 
           for attempt in {1..12}; do
-            if curl --fail --silent --show-error "$URL"; then
-              echo "Rollback successful. Previous image is healthy."
+            if curl --fail --silent --show-error --max-time 15 "$URL"; then
+              echo "Rollback successful. Previous application is healthy."
               exit 0
             fi
 
