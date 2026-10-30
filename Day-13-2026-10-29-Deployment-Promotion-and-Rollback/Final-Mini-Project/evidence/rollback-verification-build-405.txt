@@ -1,0 +1,32 @@
+DAY 13 – ROLLBACK AND RECOVERY VERIFICATION
+
+Pipeline: azure-web-app
+Build ID: 405
+Branch: test/pipeline-failure
+
+DEPLOYMENT DETAILS
+Application: day13-deploy-sandbox-20261029
+New image deployed: day12ci331776.azurecr.io/day13-final-app:405
+
+ROLLBACK DETAILS
+Previous working image:
+day12ci331776.azurecr.io/day13-final-app:402
+
+Rollback execution:
+- Previous image was captured successfully.
+- Automatic rollback stage executed.
+- Previous image 402 was restored to Azure App Service.
+- App Service configuration confirmed the restored image.
+- Initial health-check attempt timed out.
+- Subsequent health check returned: {"status":"healthy"}
+
+FINAL RESULT
+Rollback successful. Previous application is healthy.
+
+Live health endpoint:
+http://day13-deploy-sandbox-20261029.azurewebsites.net/health
+
+Browser verification: Healthy
+
+Conclusion:
+The pipeline successfully demonstrated deployment failure handling, automatic rollback to a previous working image, and application recovery.
