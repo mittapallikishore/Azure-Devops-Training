@@ -15,6 +15,7 @@ variables:
   containerRegistry: 'day12ci331776.azurecr.io'
   imageTag: '$(Build.BuildId)'
   appName: 'day13-deploy-sandbox-20261029'
+  resourceGroup: 'azurewebapp1_group'
 
 stages:
 - stage: BuildAndPublish
@@ -45,37 +46,96 @@ stages:
         tags: |
           $(imageTag)
 
-- stage: Deploy
-  displayName: Deploy the Published Image
+- stage: DeployAndVerify
+  displayName: Deploy, Verify and Rollback
   dependsOn: BuildAndPublish
   condition: succeeded()
   jobs:
   - job: DeploySandbox
     steps:
+
+    - task: AzureCLI@2
+      displayName: Capture previous working image
+      inputs:
+        azureSubscription: 'day13-sandbox-connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          CURRENT_CONFIG=$(az webapp config show \
+            --name "$(appName)" \
+            --resource-group "$(resourceGroup)" \
+            --query linuxFxVersion \
+            --output tsv)
+
+          PREVIOUS_IMAGE="${CURRENT_CONFIG#DOCKER|}"
+
+          if [ -z "$PREVIOUS_IMAGE" ]; then
+            echo "ERROR: Previous image could not be identified."
+            exit 1
+          fi
+
+          echo "Previous image: $PREVIOUS_IMAGE"
+          echo "##vso[task.setvariable variable=previousImage]$PREVIOUS_IMAGE"
+
     - task: AzureWebAppContainer@1
-      displayName: Deploy the same image to sandbox
+      displayName: Deploy new pipeline image
       inputs:
         azureSubscription: 'day13-sandbox-connection'
         appName: '$(appName)'
         containers: '$(containerRegistry)/$(imageRepository):$(imageTag)'
 
-- stage: SmokeTest
-  displayName: Verify Deployment Health
-  dependsOn: Deploy
-  condition: succeeded()
-  jobs:
-  - job: Verify
-    steps:
     - bash: |
         URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
+
         for attempt in {1..12}; do
           if curl --fail --silent --show-error "$URL"; then
             echo "Smoke test passed."
             exit 0
           fi
+
           echo "Attempt $attempt failed. Retrying in 10 seconds..."
           sleep 10
         done
+
         echo "Smoke test failed."
         exit 1
-      displayName: Check deployed application health
+      displayName: Verify deployed application health
+
+    - task: AzureCLI@2
+      displayName: Rollback to previous working image
+      condition: failed()
+      inputs:
+        azureSubscription: 'day13-sandbox-connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          if [ -z "$(previousImage)" ]; then
+            echo "ERROR: No previous image available for rollback."
+            exit 1
+          fi
+
+          echo "Restoring previous image: $(previousImage)"
+
+          az webapp config set \
+            --name "$(appName)" \
+            --resource-group "$(resourceGroup)" \
+            --linux-fx-version "DOCKER|$(previousImage)"
+
+          az webapp restart \
+            --name "$(appName)" \
+            --resource-group "$(resourceGroup)"
+
+          URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
+
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error "$URL"; then
+              echo "Rollback successful. Previous application is healthy."
+              exit 0
+            fi
+
+            echo "Rollback check $attempt failed. Retrying..."
+            sleep 10
+          done
+
+          echo "ERROR: Rollback health check failed."
+          exit 1
