@@ -85,7 +85,7 @@ stages:
         containers: '$(containerRegistry)/$(imageRepository):$(imageTag)'
 
     - bash: |
-        URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/invalid-health"
+        URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
 
         for attempt in {1..12}; do
           if curl --fail --silent --show-error "$URL"; then
