@@ -176,7 +176,7 @@ stages:
     - bash: |
         set -e
 
-        URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
+        URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/rollback-test-invalid"
 
         for attempt in {1..12}; do
           if curl --fail --silent --show-error --max-time 15 "$URL"; then
