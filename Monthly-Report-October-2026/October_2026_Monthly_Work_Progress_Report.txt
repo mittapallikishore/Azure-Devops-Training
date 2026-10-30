@@ -1,0 +1,179 @@
+# October 2026 – Monthly Work Progress Report
+
+**Reporting Period:** 12 October 2026 – 30 October 2026  
+**Project:** Azure DevOps and CI/CD Training  
+**GitHub Repository:** `mittapallikishore/Azure-Devops-Training`  
+**Primary Branch:** `test/pipeline-failure`
+
+---
+
+## 1. Monthly Overview
+
+During October 2026, I worked on practical Azure DevOps, Git, CI/CD, Docker, Azure Container Registry (ACR), Azure App Service deployment, pipeline validation, deployment safety, and rollback exercises.
+
+The work focused on creating automated build and validation pipelines, testing application quality, building and publishing Docker images, deploying applications to Azure, checking application health, and documenting deployment and recovery procedures.
+
+## 2. Work Completed
+
+### A. Git and GitHub Repository Management
+
+- Practised Git repository initialization, branching, staging, committing, and pushing changes.
+- Maintained the Azure DevOps training project in the GitHub repository.
+- Organized daily training exercises into separate date-based folders.
+- Updated README files and project documentation.
+- Worked with feature and testing branches.
+- Practised checking Git status, reviewing changes, and synchronizing local work with GitHub.
+
+### B. Azure Resources and Environment Setup
+
+- Created and worked with Azure resource groups.
+- Practised using Azure CLI to inspect Azure resources and subscription information.
+- Worked with Azure App Service and Azure Container Registry.
+- Configured Azure DevOps service connections for deployment and container registry operations.
+- Practised managing application configuration and environment-specific settings.
+
+### C. Continuous Integration and Pipeline Validation
+
+- Created Azure DevOps YAML pipelines.
+- Connected Azure DevOps pipelines to the GitHub repository.
+- Configured automated pipeline triggers and build validation.
+- Used Node.js tooling to install dependencies and execute application tests.
+- Added automated quality checks and test-result publishing.
+- Practised successful and deliberately failing pipeline executions.
+- Reviewed pipeline logs and test results to identify failures.
+- Used pipeline conditions and validation steps to prevent unsuccessful builds from progressing.
+
+### D. Artifact Versioning and Promotion
+
+- Practised generating uniquely identifiable build artifacts.
+- Used build numbers and commit information for traceability.
+- Worked on publishing build outputs as pipeline artifacts.
+- Practised separating validation and deployment activities.
+- Worked on test-to-staging promotion and approval gates.
+- Documented artifact and deployment traceability.
+
+### E. Docker and Container Image Work
+
+- Created and refined a Dockerfile for the application.
+- Worked with Docker build instructions and container runtime configuration.
+- Used `.dockerignore` to exclude unnecessary files from the build context.
+- Installed application dependencies during the container build process.
+- Built Docker images from a clean source checkout.
+- Practised tagging images with build identifiers and commit information.
+- Ensured credentials and environment-specific secrets were not embedded in the image.
+- Documented image dependencies, configuration, and runtime requirements.
+- Worked on image provenance and traceability.
+
+### F. Azure Container Registry (ACR)
+
+- Worked with Azure Container Registry for storing Docker images.
+- Configured an Azure DevOps Docker registry service connection.
+- Practised authenticating to the registry.
+- Worked on tagging and publishing container images.
+- Used the image repository `day13-final-app` and registry `day12ci331776.azurecr.io` for the Day 13 project.
+
+### G. Azure App Service Deployment and Health Checks
+
+- Worked with Azure App Service for application deployment.
+- Configured deployment-related pipeline steps.
+- Practised deploying container images to the sandbox App Service.
+- Configured and tested the application's `/health` endpoint.
+- Used HTTP health-check responses to verify application availability.
+- Worked on retry logic and failure reporting for post-deployment health checks.
+
+### H. Deployment Safety, Rollback, and Recovery
+
+- Practised using service connections and secure pipeline variables.
+- Worked on deployment approval and environment-gate requirements.
+- Implemented or documented health-check failure handling.
+- Worked on capturing the previously deployed container image.
+- Prepared rollback steps to restore a previous image in a sandbox environment.
+- Focused on making deployment outcomes, build identifiers, and image versions traceable.
+- Worked on ensuring that a failed health check prevents a release from being treated as successful.
+
+## 3. Day 11 – Containerized Build and Image Provenance
+
+Completed the containerized build exercise.
+
+Work included:
+- Creating and refining the Dockerfile.
+- Reviewing `.dockerignore`.
+- Building the image from a clean checkout.
+- Keeping secrets and credentials outside the image.
+- Tagging images for traceability.
+- Documenting image dependencies, configuration, and runtime requirements.
+
+**Status:** Completed.
+
+## 4. Day 13 – Deployment Promotion and Rollback
+
+Worked on the Day 13 Final Mini-Project in:
+
+`Day-13-2026-10-29-Deployment-Promotion-and-Rollback/Final-Mini-Project/`
+
+The project uses a separate pipeline YAML file:
+
+`pipelines/azure-pipelines-seven-stage.yml`
+
+The seven planned stages are:
+
+1. Checkout and Build Validation
+2. Automated Tests
+3. Build Docker Image
+4. Publish Image to ACR
+5. Deploy to Azure App Service
+6. Health Check
+7. Rollback and Recovery
+
+The YAML file was corrected to address duplicate `displayName`, indentation, and whitespace issues. The updated file was staged, committed, and pushed to the `test/pipeline-failure` branch.
+
+**Current status:** YAML changes have been pushed to GitHub. The new seven-stage pipeline still needs to be run and validated in Azure DevOps. The stage results, deployment, health check, and rollback demonstration are therefore pending verification.
+
+## 5. Tools and Technologies Used
+
+- Git and GitHub
+- Azure DevOps Pipelines
+- YAML
+- PowerShell
+- Azure CLI
+- Node.js and npm
+- Docker
+- Azure Container Registry
+- Azure App Service
+- HTTP health checks
+- Pipeline artifacts and build logs
+
+## 6. Key Learning Outcomes
+
+- Improved practical understanding of Git branching and repository management.
+- Learned to create and troubleshoot Azure DevOps YAML pipelines.
+- Practised automated application testing and quality gates.
+- Improved understanding of Docker image creation and provenance.
+- Practised publishing container images to ACR.
+- Gained experience with Azure App Service deployment.
+- Learned the importance of post-deployment health checks.
+- Practised deployment safety, approval gates, and rollback planning.
+- Improved troubleshooting skills by reviewing pipeline errors and execution logs.
+- Organized project work into structured folders and documentation.
+
+## 7. Pending Work and Next Actions
+
+The following activities remain to be verified or completed:
+
+1. Run the new seven-stage Azure DevOps pipeline.
+2. Verify the result of each of the seven stages.
+3. Confirm the Docker image is successfully published to ACR.
+4. Verify deployment of the published image to Azure App Service.
+5. Confirm the `/health` endpoint returns a healthy response after deployment.
+6. Demonstrate that a health-check failure blocks a successful release.
+7. Demonstrate rollback and recovery in the sandbox environment.
+8. Capture pipeline logs and screenshots as project evidence.
+9. Update the project README with final execution results.
+
+## 8. Monthly Conclusion
+
+During October 2026, I completed practical exercises covering Git and GitHub, Azure resource setup, CI pipeline configuration, automated testing, artifact management, Docker image creation, ACR publishing, Azure App Service deployment, and deployment safety.
+
+I also prepared a separate seven-stage pipeline for the Day 13 Final Mini-Project and pushed the corrected YAML file to GitHub. The final pipeline execution, deployment verification, health-check validation, and rollback demonstration remain the next activities.
+
+**Overall:** Significant hands-on progress was made in building and documenting an end-to-end Azure DevOps CI/CD workflow. Final project validation is in progress.
