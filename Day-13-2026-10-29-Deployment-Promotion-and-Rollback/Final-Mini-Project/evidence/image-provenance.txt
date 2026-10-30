@@ -1,0 +1,11 @@
+Project: Day 13 Final Mini-Project
+Image: day12ci331776.azurecr.io/day13-final-app:20261030-001
+Registry: day12ci331776.azurecr.io
+Repository: day13-final-app
+Image ID: sha256:6b3dad34f18ab76fd7a15be4881d3678ff7ce42647da0e2944706bd0a34cf5c4
+Registry Digest: sha256:6b3dad34f18ab76fd7a15be4881d3678ff7ce42647da0e2944706bd0a34cf5c4
+Source Commit: 80ae0f510b6bfd80a683f1cfa71a2fd5ea60aac2
+Image Created: 2026-10-27T06:11:07.308645922Z
+Build Method: Docker build from the Final-Mini-Project app folder
+Push Status: Successfully pushed to Azure Container Registry
+Verification: ACR repository tag verified
