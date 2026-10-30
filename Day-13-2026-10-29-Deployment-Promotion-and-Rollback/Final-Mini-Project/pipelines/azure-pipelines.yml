@@ -1,0 +1,84 @@
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-24.04
+
+variables:
+  projectPath: 'Day-13-2026-10-29-Deployment-Promotion-and-Rollback/Final-Mini-Project'
+  imageRepository: 'day13-final-app'
+  containerRegistry: 'day12ci331776.azurecr.io'
+  imageTag: '$(Build.BuildId)'
+  appName: 'day13-deploy-sandbox-20261029'
+
+stages:
+- stage: BuildAndPublish
+  displayName: Build, Test and Publish Image
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '22.x'
+
+    - script: |
+        cd "$(Build.SourcesDirectory)/$(projectPath)/app"
+        npm ci
+        npm test
+      displayName: Run application tests
+
+    - task: Docker@2
+      displayName: Build and push image to ACR
+      inputs:
+        command: buildAndPush
+        containerRegistry: 'sc-day12-acr'
+        repository: '$(imageRepository)'
+        Dockerfile: '$(Build.SourcesDirectory)/$(projectPath)/app/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/$(projectPath)/app'
+        tags: |
+          $(imageTag)
+
+- stage: Deploy
+  displayName: Deploy the Published Image
+  dependsOn: BuildAndPublish
+  condition: succeeded()
+  jobs:
+  - job: DeploySandbox
+    steps:
+    - task: AzureWebAppContainer@1
+      displayName: Deploy the same image to sandbox
+      inputs:
+        azureSubscription: 'day13-sandbox-connection'
+        appName: '$(appName)'
+        containers: '$(containerRegistry)/$(imageRepository):$(imageTag)'
+
+- stage: SmokeTest
+  displayName: Verify Deployment Health
+  dependsOn: Deploy
+  condition: succeeded()
+  jobs:
+  - job: Verify
+    steps:
+    - bash: |
+        URL="https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
+        for attempt in {1..12}; do
+          if curl --fail --silent --show-error "$URL"; then
+            echo "Smoke test passed."
+            exit 0
+          fi
+          echo "Attempt $attempt failed. Retrying in 10 seconds..."
+          sleep 10
+        done
+        echo "Smoke test failed."
+        exit 1
+      displayName: Check deployed application health
