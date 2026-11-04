@@ -1,0 +1,17 @@
+﻿DAY 5 - SUCCESS PIPELINE EVIDENCE
+Date: 2026-11-04
+Pipeline: Day5-Pipeline-Validation-Success
+Pipeline ID: 31
+Run ID: 505
+Build Number: 20261104.1
+Branch: test/pipeline-failure
+Status: completed
+Result: succeeded
+Published Artifact: Success-Demo
+Artifact ID: 322
+
+Verification:
+Azure DevOps artifact listing confirms that Success-Demo was published.
+The YAML creates result.txt in the artifact staging directory.
+Local artifact download was attempted but blocked by Azure DevOps authorization error TF400813.
+Therefore, local file-content verification is pending.
