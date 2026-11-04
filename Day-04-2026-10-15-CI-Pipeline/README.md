@@ -1,102 +1,68 @@
-# Day 4 — CI Pipeline
+﻿# Day 4 - CI Pipeline
 
 **Date:** 15 October 2026
 
 ## Objective
-
-Create a basic Continuous Integration (CI) pipeline in Azure DevOps to validate application changes automatically, run available tests, and publish build artifacts.
+Create a Continuous Integration pipeline in Azure DevOps to validate project files, run available tests, and publish a pipeline artifact.
 
 ## Tasks Performed
-
-1. **Azure DevOps Project:** Explored the Azure DevOps project and configured the connection to the GitHub repository.
-2. **YAML Pipeline:** Created and configured an Azure DevOps pipeline using a YAML file stored in the repository.
-3. **Dependency Installation:** Configured the pipeline to install the application's required dependencies when `package.json` is available.
-4. **Build and Validation:** Added pipeline steps to check required project files and validate the application.
-5. **Automated Tests:** Configured the pipeline to run the available tests when a test script is defined in `package.json`.
-6. **Pipeline Triggers:** Configured the pipeline to run for changes on the `main` branch that match the configured project path filters.
-7. **Pipeline Logs:** Reviewed pipeline execution logs to understand successful steps and troubleshoot failures.
-8. **Repository Organization:** Moved the `DevOps-Capstone` folder from the Day 3 folder into `Day-04-2026-10-15-CI-Pipeline` to organize the CI pipeline work under the correct training day.
-9. **Pipeline Path Update:** Updated the YAML `projectPath` variable and trigger path filters to match the new folder location.
-10. **Git and GitHub:** Staged the folder move, committed the changes, and pushed them to the GitHub repository.
-11. **Artifact Publication:** Configured the pipeline to publish the `DevOps-Capstone` project files as a pipeline artifact after successful validation.
+1. Explored the Azure DevOps project and GitHub repository connection.
+2. Created YAML-based CI pipeline definitions.
+3. Configured validation of required project files.
+4. Configured Node.js version 20.x.
+5. Added conditional dependency installation using npm.
+6. Configured conditional execution of npm tests.
+7. Added branch and path-based pipeline triggers.
+8. Created separate success and intentional failure pipeline definitions.
+9. Configured pipeline artifact publication.
+10. Organized the capstone project under the Day 4 folder.
 
 ## Repository Structure
-
-```text
-Demo-App-docs-upload/
-├── Day-03-2026-10-14-Azure-Resources-and-Identity/
-└── Day-04-2026-10-15-CI-Pipeline/
-    ├── README.md
-    └── DevOps-Capstone/
-        ├── .gitignore
-        ├── README.md
-        ├── azure-pipelines.yml
-        ├── src/
-        ├── tests/
-        └── docs/
-```
-
-The `DevOps-Capstone` folder contains the CI pipeline configuration and related project files. Additional folders or files may exist depending on the current repository contents.
+Day-04-2026-10-15-CI-Pipeline/
+|-- README.md
+-- DevOps-Capstone/
+    |-- .gitignore
+    |-- README.md
+    |-- azure-pipelines.yml
+    |-- azure-pipelines-success.yml
+    -- azure-pipelines-failure.yml
 
 ## Pipeline Configuration
+- Platform: Azure DevOps Pipelines
+- Source control: GitHub
+- Build agent: windows-latest
+- Node.js: 20.x
+- Main branch: main
+- Artifact: DevOps-Capstone
+- Main YAML: DevOps-Capstone/azure-pipelines.yml
 
-**Platform:** Azure DevOps  
-**Source control:** Git and GitHub  
-**Pipeline definition:** `azure-pipelines.yml`  
-**Build agent:** `windows-latest`  
-**Node.js version:** `20.x`  
-**Primary branch:** `main`  
-**Artifact name:** `DevOps-Capstone`
+## Main Pipeline Workflow
+1. Check out the repository.
+2. Validate README.md and azure-pipelines.yml.
+3. Configure Node.js.
+4. Install dependencies if package.json exists.
+5. Run npm test if a test script exists.
+6. Copy project files to the artifact staging directory.
+7. Publish the DevOps-Capstone artifact after successful validation.
 
-### YAML Pipeline Path
+**Current limitation:** The capstone folder does not contain package.json. Therefore, dependency installation and application tests are skipped by the current conditional pipeline logic.
 
-```text
-/Day-04-2026-10-15-CI-Pipeline/DevOps-Capstone/azure-pipelines.yml
-```
+## Trigger Policy
+- Main pipeline: triggers on main for changes under the Day 4 capstone folder.
+- Pull requests: configured for main.
+- Success pipeline: triggers on main and test/pipeline-failure, with a single-level path wildcard.
+- Failure pipeline: manual-only, with CI and PR triggers disabled.
 
-The Azure DevOps pipeline definition must reference this new YAML path after the file is moved in the repository.
+## Learning Outcomes
+- Understand YAML-based pipeline configuration.
+- Configure branch and path filters.
+- Validate repository files automatically.
+- Understand conditional dependency installation and test execution.
+- Publish pipeline artifacts after successful validation.
+- Use pipeline logs to investigate failures.
 
-### Pipeline Workflow
+## Evidence
+The YAML files document the pipeline configuration. Actual execution results, logs, and artifact verification are documented separately under Day 5 - Pipeline Validation.
 
-1. **Checkout:** Retrieves the source code from the connected repository.
-2. **Check Project Files:** Verifies that the required project files, including `README.md` and `azure-pipelines.yml`, are present.
-3. **Install Node.js:** Sets up Node.js version `20.x` on the build agent.
-4. **Install Dependencies:** Runs `npm ci` when `package-lock.json` exists, or `npm install` otherwise, if `package.json` is present.
-5. **Run Tests:** Runs `npm test` if a test script is configured in `package.json`.
-6. **Publish Artifact:** Copies the project files and publishes the `DevOps-Capstone` artifact after the validation stage succeeds.
-
-If dependency installation or configured tests fail, the validation stage fails and the artifact publication stage does not proceed.
-
-## Pipeline Trigger Policy
-
-The YAML pipeline uses branch and path filters to control when automatic runs start.
-
-- **Main branch:** Changes on `main` that match the configured project path trigger the pipeline.
-- **Path filter:** The configured path is `Day-04-2026-10-15-CI-Pipeline/DevOps-Capstone/**`.
-- **Other repository paths:** Changes outside the configured path do not trigger the pipeline through this path filter.
-- **Pull requests:** Pull-request validation depends on the configured PR trigger and repository provider settings.
-- **Manual execution:** The pipeline can also be started manually from Azure DevOps.
-
-## Git Workflow
-
-The following commands can be used from the repository root in PowerShell to inspect, stage, commit, and push changes:
-
-```powershell
-git status
-git add -A Day-03-2026-10-14-Azure-Resources-and-Identity/DevOps-Capstone Day-04-2026-10-15-CI-Pipeline/DevOps-Capstone
-git diff --cached --check
-git commit -m "Move CI pipeline project to Day 4 folder"
-git push origin main
-```
-
-Before committing, review the staged changes with `git status`. Avoid including unrelated modified files, secrets, access tokens, passwords, or local dependency folders such as `node_modules`.
-
-## Observations
-
-- YAML defines pipeline stages, jobs, and tasks as code.
-- Automated validation helps detect problems early in the development process.
-- Pipeline logs make it easier to identify failed tasks and troubleshoot errors.
-- Repository triggers help automate validation when relevant changes are pushed.
-- Path filters help avoid unnecessary runs for unrelated repository changes.
-- Publishing an artifact makes the validated project files available for later stages or release workflows.
-- Moving a pipeline YAML
+## Outcome
+The Day 4 CI pipeline configurations and capstone documentation are organized in the repository.
