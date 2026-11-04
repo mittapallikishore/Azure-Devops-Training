@@ -83,3 +83,33 @@ Understood the basics of Azure resource organization, identity management, RBAC,
 - Microsoft Entra ID: https://learn.microsoft.com/en-us/entra/
 - Azure RBAC: https://learn.microsoft.com/en-us/azure/role-based-access-control/overview
 - Azure DevOps service connections: https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints
+
+##  Evidence and Verification
+
+Azure CLI verification was performed on 4 November 2026.
+
+### Verified Azure Account
+- Subscription display name: `Azure subscription 1`
+- Subscription state: `Enabled`
+- Default subscription: `True`
+
+### Verified Resource Group
+- Name: `rg-devops-practice`
+- Location: `centralindia`
+- Provisioning state: `Succeeded`
+
+### Resource Group Inventory
+The Azure CLI listed five resource groups. All five showed a provisioning state of `Succeeded`:
+- `webapp`
+- `CICD`
+- `DefaultResourceGroup-INSC`
+- `azurewebapp1_group`
+- `rg-devops-practice`
+
+### Evidence File
+The command output is saved in:
+
+`evidence/azure-cli-verification.txt`
+
+### Verification Scope
+This evidence confirms the active Azure CLI subscription and resource-group status. Microsoft Entra ID concepts and Azure RBAC were covered as learning topics; this evidence file does not independently verify user, group, or role assignments.
