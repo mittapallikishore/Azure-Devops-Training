@@ -158,3 +158,31 @@ The end-to-end containerized CI/CD workflow was implemented and executed. The pi
 
 \*\*Final verification:\*\* The previous working image was restored successfully, and the live application health endpoint returned a healthy response.
 
+
+## Active Azure DevOps Pipeline Configuration
+
+**Pipeline name:** `azure-web-app`
+
+**Configured YAML file:**
+`pipelines/azure-pipelines-seven-stage.yml`
+
+The seven-stage YAML file is the active pipeline configuration in Azure DevOps.
+
+**Execution configuration:**
+- Automatic CI trigger: Disabled (`trigger: none`)
+- Pull request trigger: Disabled (`pr: none`)
+- Pipeline execution: Started manually from Azure DevOps.
+
+**Negative health-check demonstration:**
+
+The health-check stage uses an intentionally invalid endpoint (`/rollback-test-invalid`) to demonstrate failure handling and automatic rollback.
+
+The actual application health endpoint is:
+
+`https://day13-deploy-sandbox-20261029.azurewebsites.net/health`
+
+**Endpoint verification – 04 November 2026:**
+- Invalid endpoint returned HTTP 404 Not Found, as expected.
+- Actual `/health` endpoint returned a healthy response.
+
+See `evidence/endpoint-verification.txt` for verification details.

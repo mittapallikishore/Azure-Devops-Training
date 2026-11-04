@@ -1,0 +1,15 @@
+Day 13 Endpoint Verification
+Date: 2026-11-04
+Application: day13-deploy-sandbox-20261029
+
+Negative test:
+Endpoint: /rollback-test-invalid
+Result: HTTP 404 Not Found (expected)
+
+Health check:
+Endpoint: /health
+Result: Healthy
+
+Conclusion:
+The invalid endpoint test behaved as expected.
+The actual application health endpoint is responding successfully.

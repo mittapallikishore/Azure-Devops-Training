@@ -1,4 +1,4 @@
-﻿# Deployment and Rollback Runbook
+# Deployment and Rollback Runbook
 
 ## 1\. Project Information
 
@@ -46,11 +46,11 @@ day12ci331776.azurecr.io/day13-final-app:405
 
 Health endpoint:
 
-http://day13-deploy-sandbox-20261029.azurewebsites.net/health
+https://day13-deploy-sandbox-20261029.azurewebsites.net/health
 
 PowerShell command:
 
-Invoke-RestMethod -Uri "http://day13-deploy-sandbox-20261029.azurewebsites.net/health"
+Invoke-RestMethod -Uri "https://day13-deploy-sandbox-20261029.azurewebsites.net/health"
 
 Expected response:
 
@@ -139,4 +139,32 @@ Build 405 demonstrated deployment failure handling and automatic rollback to the
 The subsequent health check confirmed successful application recovery.
 
 Status: Runbook prepared for review.
+
+
+## 12. Active Pipeline Configuration
+
+Pipeline name: azure-web-app
+
+Active YAML file:
+pipelines/azure-pipelines-seven-stage.yml
+
+Execution configuration:
+- CI trigger: Disabled (trigger: none)
+- PR trigger: Disabled (pr: none)
+- Pipeline execution: Manual from Azure DevOps.
+
+## 13. Endpoint Verification - 04 November 2026
+
+Negative test:
+- Endpoint: /rollback-test-invalid
+- Result: HTTP 404 Not Found (expected).
+
+Actual health check:
+- Endpoint: /health
+- Result: Healthy.
+
+The invalid endpoint was used for the negative health-check demonstration.
+The actual application health endpoint returned a healthy response.
+
+Evidence: evidence/endpoint-verification.txt
 
