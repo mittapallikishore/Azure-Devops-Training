@@ -1,26 +1,42 @@
-# Azure DevOps Repository Triggers
+﻿# Azure DevOps Repository Triggers
 
 ## Objective
-Document when the existing CI pipeline should run after repository changes.
+Document the branch and path filters configured in the existing application pipeline.
 
-## Current Trigger Configuration
-- **Main branch:** Runs when matching file changes are pushed to `main`.
-- **Feature branches:** Runs when matching file changes are pushed to branches matching `feature/*`.
-- **Path filters:** The pipeline monitors `index.html`, `package.json`, files under `tests/`, and `azure-pipelines.yml`.
-- **Other files:** Changes outside these paths may not trigger a CI run through this configuration.
+## Current Branch Filters
+- `main`
+- `feature/*`
+
+## Current Path Filters
+- `index.html`
+- `package.json`
+- `tests/*`
+- `azure-pipelines.yml`
+
+These paths are currently configured relative to the repository root.
+
+## Path Filter Configuration Gap
+Application files are located inside `azure-website-project`.
+
+If the intention is to monitor those application files, review repository-relative paths such as:
+- `azure-website-project/index.html`
+- `azure-website-project/package.json`
+- `azure-website-project/package-lock.json`
+- `azure-website-project/tests/*`
+- `azure-website-project/azure-pipelines.yml`
+
+These are recommended paths, not the currently configured values.
 
 ## Pull Request Validation
-The YAML does not explicitly define a `pr` trigger. Verify the effective pull-request validation behavior in Azure DevOps for the GitHub repository.
+The inspected YAML does not explicitly define a `pr` trigger. Verify pull-request validation and branch policies separately in Azure DevOps.
 
 ## Verification Steps
-1. Save and commit the pipeline configuration.
-2. Push a change to a monitored file on `main` or a `feature/*` branch.
-3. Open Azure DevOps and check **Pipelines → Runs**.
-4. Confirm whether a new run starts and inspect its logs.
-5. Create a pull request and verify its validation behavior separately.
-
-## Observation
-Branch and path filters help avoid unnecessary pipeline runs. Pull-request validation must also be verified.
+1. Review branch and path filters in the pipeline YAML.
+2. Confirm that the paths match the repository structure.
+3. Check CI run history in Azure DevOps.
+4. Inspect pipeline logs.
+5. Verify pull-request validation separately.
+6. Review Test and Staging environment approvals and checks.
 
 ## Outcome
-Documented the existing branch triggers, path filters, and pull-request validation checks.
+Documented existing branch and path filters, identified the application-directory mismatch, and recorded pull-request validation checks requiring verification.
