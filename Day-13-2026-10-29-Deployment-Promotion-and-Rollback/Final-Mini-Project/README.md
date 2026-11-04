@@ -192,3 +192,11 @@ See `evidence/endpoint-verification.txt` for verification details.
 The complete seven-stage deployment workflow, including health validation and rollback recovery, is documented here:
 
 - [View Pipeline Architecture](pipeline-architecture.md)
+
+## Secure Authentication Verification
+
+- Azure Container Registry service connection: `sc-day12-acr`
+- Azure deployment service connection: `day13-sandbox-connection`
+- Both service connections were verified successfully in Azure DevOps.
+- No hard-coded password, client secret, or access token patterns were found in the seven-stage pipeline YAML.
+- Azure authentication is handled through Azure DevOps service connections.
