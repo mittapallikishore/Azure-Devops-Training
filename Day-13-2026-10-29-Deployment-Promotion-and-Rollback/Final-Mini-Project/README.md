@@ -186,3 +186,9 @@ The actual application health endpoint is:
 - Actual `/health` endpoint returned a healthy response.
 
 See `evidence/endpoint-verification.txt` for verification details.
+
+## Pipeline Architecture
+
+The complete seven-stage deployment workflow, including health validation and rollback recovery, is documented here:
+
+- [View Pipeline Architecture](pipeline-architecture.md)
