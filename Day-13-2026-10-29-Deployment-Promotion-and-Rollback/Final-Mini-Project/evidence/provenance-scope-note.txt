@@ -1,0 +1,17 @@
+DAY 13 - IMAGE PROVENANCE SCOPE
+
+Existing provenance record:
+Image: day12ci331776.azurecr.io/day13-final-app:20261030-001
+Source commit: 80ae0f510b6bfd80a683f1cfa71a2fd5ea60aac2
+Source commit verification: Confirmed in Git repository.
+
+Build 405 deployment:
+Image: day12ci331776.azurecr.io/day13-final-app:405
+Previous working image: day12ci331776.azurecr.io/day13-final-app:402
+
+Important clarification:
+The existing provenance record documents image tag 20261030-001.
+It does not independently establish the source commit for Build 405 image tag 405.
+Build 405 rollback and application recovery are documented separately in rollback-verification-build-405.txt.
+
+Further build-specific provenance evidence is required to establish the source commit and digest for image tag 405.

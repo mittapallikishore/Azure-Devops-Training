@@ -186,3 +186,11 @@ Both Azure DevOps service connections were verified successfully:
 - `day13-sandbox-connection` – Azure deployment connection.
 
 The seven-stage pipeline YAML scan found no hard-coded credential patterns.
+
+## 15. Image Provenance Scope
+
+The existing provenance evidence documents image tag `20261030-001` and its source commit. The commit was verified in the Git repository.
+
+This evidence does not independently establish the source commit for Build 405 image tag `405`. Build 405 rollback evidence is maintained separately.
+
+See `evidence/provenance-scope-note.txt`.
