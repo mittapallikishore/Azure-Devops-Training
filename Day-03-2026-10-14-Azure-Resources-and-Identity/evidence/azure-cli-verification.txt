@@ -1,0 +1,27 @@
+﻿DAY 3 - AZURE RESOURCES AND IDENTITY
+Azure CLI verification evidence
+Captured: 2026-11-04 15:11:02
+
+AZURE ACCOUNT
+{
+  "IsDefault": true,
+  "Name": "Azure subscription 1",
+  "State": "Enabled"
+}
+
+RESOURCE GROUP: rg-devops-practice
+{
+  "Location": "centralindia",
+  "Name": "rg-devops-practice",
+  "ProvisioningState": "Succeeded"
+}
+
+RESOURCE GROUP INVENTORY
+Name                       Location           State
+-------------------------  -----------------  ---------
+webapp                     westus3            Succeeded
+CICD                       westus3            Succeeded
+DefaultResourceGroup-INSC  indiasouthcentral  Succeeded
+azurewebapp1_group         indiasouthcentral  Succeeded
+rg-devops-practice         centralindia       Succeeded
+
