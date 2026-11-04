@@ -186,3 +186,25 @@ The actual application health endpoint is:
 - Actual `/health` endpoint returned a healthy response.
 
 See `evidence/endpoint-verification.txt` for verification details.
+
+## Pipeline Architecture
+
+The complete seven-stage deployment workflow, including health validation and rollback recovery, is documented here:
+
+- [View Pipeline Architecture](pipeline-architecture.md)
+
+## Secure Authentication Verification
+
+- Azure Container Registry service connection: `sc-day12-acr`
+- Azure deployment service connection: `day13-sandbox-connection`
+- Both service connections were verified successfully in Azure DevOps.
+- No hard-coded password, client secret, or access token patterns were found in the seven-stage pipeline YAML.
+- Azure authentication is handled through Azure DevOps service connections.
+
+## Image Provenance Scope
+
+The existing image provenance record documents image tag `20261030-001` and source commit `80ae0f510b6bfd80a683f1cfa71a2fd5ea60aac2`. The source commit was verified in Git.
+
+This record does not independently establish the source commit for Build 405 image tag `405`. Build 405 deployment and rollback results are documented separately.
+
+See `evidence/provenance-scope-note.txt` for details.

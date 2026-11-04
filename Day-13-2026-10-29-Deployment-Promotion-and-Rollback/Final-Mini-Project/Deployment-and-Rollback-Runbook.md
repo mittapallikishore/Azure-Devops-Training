@@ -1,4 +1,4 @@
-# Deployment and Rollback Runbook
+﻿# Deployment and Rollback Runbook
 
 ## 1\. Project Information
 
@@ -167,4 +167,24 @@ The invalid endpoint was used for the negative health-check demonstration.
 The actual application health endpoint returned a healthy response.
 
 Evidence: evidence/endpoint-verification.txt
+
+
+## 14. Secure Authentication Verification
+
+Both Azure DevOps service connections were verified successfully:
+
+- `sc-day12-acr` – Container Registry connection.
+- `day13-sandbox-connection` – Azure deployment connection.
+
+The seven-stage pipeline YAML scan found no hard-coded credential patterns.
+
+## 15. Image Provenance Scope
+
+The original provenance record documents image tag `20261030-001` and its source commit.
+
+Build 405 image provenance is separately documented in `evidence/build-405-image-provenance.txt`. It records the Azure DevOps run, source branch, source commit, ACR image tag, and image digest.
+
+The Build 405 image record reports `signed: false`; therefore, this evidence establishes traceability but does not claim cryptographic image signing.
+
+See `evidence/image-provenance.txt` and `evidence/build-405-image-provenance.txt`.
 

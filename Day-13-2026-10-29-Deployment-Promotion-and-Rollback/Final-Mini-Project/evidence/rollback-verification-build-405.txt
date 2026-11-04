@@ -24,9 +24,10 @@ FINAL RESULT
 Rollback successful. Previous application is healthy.
 
 Live health endpoint:
-http://day13-deploy-sandbox-20261029.azurewebsites.net/health
+https://day13-deploy-sandbox-20261029.azurewebsites.net/health
 
 Browser verification: Healthy
 
 Conclusion:
 The pipeline successfully demonstrated deployment failure handling, automatic rollback to a previous working image, and application recovery.
+

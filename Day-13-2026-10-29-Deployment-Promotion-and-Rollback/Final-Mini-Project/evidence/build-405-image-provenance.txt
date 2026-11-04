@@ -1,0 +1,56 @@
+﻿DAY 13 - BUILD 405 IMAGE PROVENANCE VERIFICATION
+
+PIPELINE DETAILS
+Pipeline: azure-web-app
+Build ID: 405
+Build Number: 20261030.4
+Branch: test/pipeline-failure
+Run Result: Failed
+Trigger: Manual
+
+SOURCE CODE DETAILS
+Source Commit:
+057412a6bb3884e838c4abf881bc03117f31e744
+
+Commit Date:
+2026-10-30T16:03:01+05:30
+
+Commit Message:
+Update azure-pipelines-seven-stage.yml for Azure Pipelines
+
+CONTAINER IMAGE DETAILS
+Registry: day12ci331776.azurecr.io
+Repository: day13-final-app
+Image Tag: 405
+
+Full Image:
+day12ci331776.azurecr.io/day13-final-app:405
+
+Image Digest:
+sha256:3a847f509a6ac3dad12d434361ddc7d83974a17c54149779efbdda5296c955b8
+
+ACR Image Created:
+2026-10-30T10:40:58.3953247Z
+
+ACR Signature Metadata:
+signed: false
+
+VERIFICATION
+- Azure DevOps run 405 source version was retrieved.
+- The source commit was verified in the local Git repository.
+- The image tag 405 was found in Azure Container Registry.
+- The image digest was retrieved from ACR.
+- The image tag and digest identify the published registry artifact.
+- This record connects the pipeline run, source commit and image tag.
+- ACR metadata reports that the image is not signed; no cryptographic signature verification is claimed.
+
+DEPLOYMENT AND RECOVERY
+Build 405 was used in the deployment and rollback demonstration.
+The rollback evidence is documented separately in:
+rollback-verification-build-405.txt
+
+CONCLUSION
+The Build 405 source commit and published container image have been
+identified and documented. The registry digest provides an exact
+identifier for the published image. This evidence does not constitute
+a cryptographically signed provenance attestation.

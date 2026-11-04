@@ -1,0 +1,21 @@
+﻿DAY 13 - IMAGE PROVENANCE SCOPE
+
+Original provenance record:
+Image: day12ci331776.azurecr.io/day13-final-app:20261030-001
+Source commit: 80ae0f510b6bfd80a683f1cfa71a2fd5ea60aac2
+Source commit verification: Confirmed in Git repository.
+Evidence: image-provenance.txt
+
+Build 405 image provenance:
+Image: day12ci331776.azurecr.io/day13-final-app:405
+Source branch: refs/heads/test/pipeline-failure
+Source commit: 057412a6bb3884e838c4abf881bc03117f31e744
+Build ID: 405
+Image digest: sha256:3a847f509a6ac3dad12d434361ddc7d83974a17c54149779efbdda5296c955b8
+Previous working image used for rollback: day12ci331776.azurecr.io/day13-final-app:402
+Evidence: build-405-image-provenance.txt
+Rollback evidence: rollback-verification-build-405.txt
+
+Scope clarification:
+The Build 405 evidence links the pipeline run and source commit to the published ACR image tag and digest.
+The image record reports signed: false. Cryptographic image signing is not claimed by this evidence.
