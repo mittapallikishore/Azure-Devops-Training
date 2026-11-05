@@ -1,0 +1,26 @@
+Release Information
+===================
+
+Project: Azure DevOps Training
+Build Pipeline Definition ID: 11
+Build Run ID: 114
+Build Number: 20261024.3
+
+Published Artifact: Website-Release
+
+Artifact Contents:
+- index.html
+- server.js
+- release-info.txt
+
+Promotion Validation:
+- Test stage: Successful
+- Production stage: Successful
+
+Deployment Scope:
+Test and Production were pipeline validation stages.
+No actual application-server deployment was performed.
+
+Purpose:
+Demonstrate artifact publication, version traceability,
+and staged promotion validation.
