@@ -1,71 +1,33 @@
-# CI/CD Pipeline Architecture
+﻿# CI/CD Pipeline Architecture
 
 ## Objective
-Define a clear build-and-release flow for a sample Node.js application using Azure DevOps.
+Document the existing Azure DevOps pipeline for the sample Node.js website.
 
-## Pipeline Stages
+## Stage 1 - Build and Test
+- Checks out the repository.
+- Configures Node.js 22.
+- Installs dependencies and runs quality tests.
+- Publishes JUnit test results and test logs.
+- Creates a website artifact with index.html and provenance.txt.
+- Records build ID, build number, commit SHA, and repository name.
 
-1. **Checkout:** Download the repository source code.
-2. **Dependency Restore:** Install dependencies using `npm ci`.
-3. **Build:** Compile or package the application when a build script is available.
-4. **Test:** Run automated tests and stop the pipeline if they fail.
-5. **Artifact Publication:** Publish the validated build output for later use.
-6. **Deployment:** Deploy the same published artifact to the target environment after required approvals.
+## Stage 2 - Deploy to Test
+- Downloads the website artifact.
+- Verifies that index.html and provenance.txt exist.
+- Performs artifact verification, not a live deployment.
 
-## Workflow Diagram
+## Stage 3 - Promote to Staging
+- Downloads the same website artifact.
+- Displays provenance information.
+- Verifies the website HTML file.
+- Performs artifact verification, not a live deployment.
 
-```text
-Code Change
-    |
-    v
-Repository Checkout
-    |
-    v
-Install Dependencies
-    |
-    v
-Build and Test
-    |
-    v
-Publish Artifact
-    |
-    v
-Approval / Deployment
-    |
-    v
-Verify Application Health
-```
-
-## Pipeline Design Principles
-- Keep build and deployment responsibilities clear.
-- Fail the pipeline when required tests fail.
-- Publish identifiable artifacts.
-- Avoid storing secrets in source code.
-- Keep logs readable and actionable.
-
-## Observation
-## Observation
-
-- The pipeline triggers on changes to selected files in `main` and `feature/*` branches.
-- It checks out the source code and configures Node.js 22.
-- It runs tests and captures test logs.
-- It publishes test results and a versioned website artifact containing build and commit details.
-- It downloads and verifies the same artifact in Test and Staging environments.
-- Deployment is currently simulated through artifact verification; actual website deployment is not shown in this YAML.
-
-## Current Gaps
-
-- Confirm that pull-request validation is configured for the GitHub repository.
-- Confirm that `npm test` runs successfully and produces the expected JUnit test results.
-- Verify whether the `test` and `staging` environments have appropriate approvals and checks.
-- Confirm that all required stages and trigger behavior work in Azure DevOps.
+## Current Configuration Gaps
+1. Application files are inside azure-website-project, but path filters use root-level paths.
+2. npm ci, npm test, and cp index.html need a verified application working directory.
+3. No explicit PR trigger is defined in the inspected YAML.
+4. Test and Staging approvals and checks need verification.
+5. Actual website deployment is not implemented.
 
 ## Outcome
-
-Inspected the existing Azure DevOps pipeline and documented its triggers, validation steps, artifact publication, environment verification, and remaining gaps.
-
-## Outcome
-Documented the planned pipeline stages from source checkout through deployment verification.
-
-## Implementation Status
-This document describes the intended workflow. Verify each stage in the actual Azure DevOps pipeline before marking it as implemented.
+Documented the three pipeline stages, artifact flow, provenance details, and remaining configuration gaps.

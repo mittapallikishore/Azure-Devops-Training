@@ -1,24 +1,43 @@
-# Day 6 — Pipeline Architecture and Repository Triggers
+﻿# Day 6 - Pipeline Architecture and Repository Triggers
 
 **Date:** 19 October 2026
 
 ## Objective
-Design a clear CI/CD pipeline flow and configure repository triggers for automated validation.
+Review and document the CI/CD pipeline architecture, repository triggers, artifact flow, and environment promotion process.
 
-## Tasks Performed
-1. **Repository Inspection:** Reviewed the repository layout, application files, existing YAML pipeline files, and test folders.
-2. **Pipeline Architecture:** Defined the workflow from code checkout through dependency installation, build, tests, artifact publication, and deployment.
-3. **YAML Configuration:** Reviewed and updated the Azure DevOps pipeline YAML configuration.
-4. **Branch Triggers:** Configured the pipeline to run when changes are pushed to the main branch.
-5. **Pull Request Validation:** Reviewed how pull requests can trigger validation before changes are merged.
-6. **Pipeline Execution:** Ran the pipeline and inspected its logs and results.
-7. **Documentation:** Documented the pipeline stages, trigger behavior, and validation process.
+## Work Reviewed
+1. Inspected the repository and application folder structure.
+2. Reviewed the existing Azure DevOps pipeline YAML.
+3. Identified the Build and Test, Deploy to Test, and Promote to Staging stages.
+4. Reviewed branch and path filters.
+5. Examined test reporting, log publication, and artifact provenance.
+6. Identified configuration gaps requiring correction or verification.
 
-## Observations
-- YAML defines the pipeline workflow and its execution steps.
-- Branch and pull request triggers help automate validation.
-- Pipeline logs help identify configuration and execution errors.
-- Trigger behavior depends on the YAML configuration, repository settings, and branch policies.
+## Pipeline Architecture
+The inspected pipeline contains three stages:
+- Build and Test
+- Deploy to Test
+- Promote to Staging
+
+The Build and Test stage publishes a website artifact with application HTML and provenance information. Test and Staging download and verify the same artifact.
+
+**Important:** Test and Staging currently perform artifact verification simulations, not live website deployments.
+
+See `examples/pipeline-architecture.md` for details.
+
+## Repository Triggers
+- Branch filters: `main` and `feature/*`
+- Path filters: `index.html`, `package.json`, `tests/*`, and `azure-pipelines.yml`
+- No explicit `pr` trigger in the inspected YAML.
+
+See `examples/repository-triggers.md` for details.
+
+## Configuration Gaps
+- Application files are inside `azure-website-project`, but configured path filters use root-level paths.
+- `npm ci`, `npm test`, and `cp index.html` appear to run from the repository root rather than the application directory.
+- Pull-request validation requires separate verification.
+- Test and Staging approvals and checks require verification in Azure DevOps.
+- Actual website deployment is not implemented in the inspected pipeline.
 
 ## Outcome
-Documented the CI/CD workflow and reviewed repository triggers to support automated validation of application changes.
+Reviewed and documented the existing pipeline architecture and trigger configuration. Identified path-filter and working-directory issues that should be corrected before treating the pipeline as fully reproducible.

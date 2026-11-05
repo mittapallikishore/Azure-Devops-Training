@@ -1,0 +1,13 @@
+﻿DAY 5 - INTENTIONAL FAILURE PIPELINE EVIDENCE
+Date: 2026-11-04
+Pipeline: Day5-Pipeline-Validation-Failure
+Pipeline ID: 32
+Run ID: 506
+Build Number: 20261104.1
+Branch: test/pipeline-failure
+Status: completed
+Result: failed (expected)
+Task: Simulate intentional failure
+Log ID: 6
+Verified message: Intentional failure for Day 5 demonstration.
+PowerShell exit code: 1
