@@ -74,3 +74,39 @@ Some products can provide both sets of capabilities.
 ## Learning Outcome
 
 Differentiate API Gateway from Load Balancer, Reverse Proxy, Service Mesh, CDN and Kubernetes Ingress.
+
+## 6. Advantages and Disadvantages of an API Gateway
+
+### Advantages
+
+1. **Centralized API Access:** Clients communicate through one entry point instead of connecting directly to multiple backend services.
+2. **Improved Security:** Authentication, authorization, API keys, token validation, and security policies can be managed centrally.
+3. **Simplified Client Applications:** Clients do not need to know the individual locations and details of backend microservices.
+4. **Centralized Monitoring and Logging:** API requests, response times, errors, and traffic can be monitored from a common point.
+5. **Rate Limiting and Traffic Management:** The gateway can control request rates and help protect backend services from excessive traffic.
+6. **Easier Microservices Integration:** The gateway can route requests to different services and combine responses when required.
+7. **API Versioning and Transformation:** It can support multiple API versions and transform request or response data when necessary.
+
+### Disadvantages
+
+1. **Single Point of Failure:** If the gateway becomes unavailable and high availability is not configured, clients may lose access to backend services.
+2. **Additional Network Latency:** Requests pass through an additional component, which can increase response time.
+3. **Infrastructure and Operational Costs:** Deploying, scaling, monitoring, and maintaining a gateway requires resources and expertise.
+4. **Configuration Complexity:** Routing rules, security policies, rate limits, certificates, and integrations can become difficult to manage.
+5. **Performance Bottleneck:** An undersized or overloaded gateway can restrict the performance of the entire application.
+6. **Maintenance and Scaling Requirements:** Gateway capacity, availability, security updates, and configuration must be maintained.
+7. **Tight Coupling Risk:** Putting too much business logic inside the gateway can make the architecture harder to maintain and change.
+
+### When Should We Use an API Gateway?
+
+An API Gateway is particularly useful when:
+- An application has multiple backend services or microservices.
+- Different clients need a common API entry point.
+- Centralized security, monitoring, and traffic control are required.
+- APIs need routing, versioning, or response aggregation.
+
+For a small application with only one simple backend service, an API Gateway may introduce unnecessary complexity. The decision should depend on the application's scale, architecture, security requirements, and operational needs.
+
+### Key Takeaway
+
+An API Gateway provides centralized access, security, routing, and traffic management. However, it also introduces an additional component that must be secured, monitored, scaled, and maintained.
