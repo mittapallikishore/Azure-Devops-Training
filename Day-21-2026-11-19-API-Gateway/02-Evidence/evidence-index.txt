@@ -1,0 +1,17 @@
+API Gateway evidence – 2026-11-19
+
+Source capture: terminal-validation-output.txt
+
+Verified from the supplied capture:
+- Missing API key: HTTP 401
+- Invalid API key: HTTP 401
+- Valid API key: HTTP 200
+- /health: HTTP 200
+- nginx -t: syntax OK and test successful
+- Active rate-limit directives displayed by nginx -T
+- Rapid test: requests 1–2 returned 200; requests 3–10 returned 429
+- NGINX error log reported limiting requests in zone "api_limit"
+
+Note: The document records reverse proxy routing as part of the current project context;
+the supplied terminal capture specifically evidences authentication, rate limiting,
+health, configuration validation, and logs.
