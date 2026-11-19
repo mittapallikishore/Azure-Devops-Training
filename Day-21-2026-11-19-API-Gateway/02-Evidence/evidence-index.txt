@@ -15,3 +15,18 @@ Verified from the supplied capture:
 Note: The document records reverse proxy routing as part of the current project context;
 the supplied terminal capture specifically evidences authentication, rate limiting,
 health, configuration validation, and logs.
+
+ADDITIONAL EVIDENCE - 19 NOVEMBER 2026
+
+1. circuit-breaker-final-validation.txt
+   Final circuit breaker status: CLOSED; consecutive failures: 0.
+   Docker Compose: NGINX, Node.js application and Payment Service running.
+   Public health endpoint: Healthy.
+
+2. Acceptance-Criteria-and-Architecture.md
+   Five concepts, failure and recovery scenario, RTO/RPO targets, team presentation notes.
+
+3. Architecture-Diagram.md
+   Mermaid architecture diagram for NGINX, Order Service, Payment Service and circuit breaker.
+
+Note: This entry records the final validation output. It does not represent additional screenshots.

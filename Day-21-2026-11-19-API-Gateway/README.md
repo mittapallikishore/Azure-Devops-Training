@@ -15,3 +15,9 @@
 - Docker Compose NGINX log verification
 
 **Project:** `DevOps-Simple-App`
+
+## Architecture Diagram
+
+See [Architecture Diagram](./Architecture-Diagram.md).
+
+See [Acceptance Criteria and Team Presentation](./Acceptance-Criteria-and-Architecture.md).
