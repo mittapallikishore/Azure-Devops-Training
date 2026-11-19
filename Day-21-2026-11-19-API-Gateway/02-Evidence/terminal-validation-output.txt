@@ -1,0 +1,139 @@
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # Test missing API key
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`nTEST 1: MISSING KEY"
+
+TEST 1: MISSING KEY
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" http://localhost:8080/api/users
+HTTP Status: 401
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # Test invalid API key
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`nTEST 2: INVALID KEY"
+
+TEST 2: INVALID KEY
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" `
+>>     -H "X-API-Key: wrong-key" http://localhost:8080/api/users
+HTTP Status: 401
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # Test valid API key
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`nTEST 3: VALID KEY"
+
+TEST 3: VALID KEY
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" `
+>>     -H "X-API-Key: devops-training-key-2026" http://localhost:8080/api/users
+HTTP Status: 200
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # Test public health endpoint
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`nTEST 4: HEALTH CHECK"
+
+TEST 4: HEALTH CHECK
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" http://localhost:8080/health
+HTTP Status: 200
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> notepad .\nginx\default.conf
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 1. Validate configuration
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== NGINX CONFIGURATION TEST ==========" -ForegroundColor Cyan
+
+========== NGINX CONFIGURATION TEST ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> docker compose exec nginx nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 2. Restart NGINX
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> docker compose restart nginx
+[+] restart 0/1
+ - Container devops-api-gateway Restarting                                                                                                                                                     0.7s
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 3. Verify rate limiting configuration
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== ACTIVE RATE LIMIT RULES ==========" -ForegroundColor Cyan
+
+========== ACTIVE RATE LIMIT RULES ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> docker compose exec nginx nginx -T 2>&1 |
+>>     Select-String -Pattern 'limit_req_zone|limit_req zone|limit_req_status'
+
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=2r/s;
+        limit_req zone=api_limit burst=2 nodelay;
+        limit_req_status 429;
+        limit_req zone=api_limit burst=2 nodelay;
+        limit_req_status 429;
+        limit_req zone=api_limit burst=2 nodelay;
+        limit_req_status 429;
+
+
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 4. Verify API key still works
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== API AUTHENTICATION TEST ==========" -ForegroundColor Yellow
+
+========== API AUTHENTICATION TEST ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" `
+>>     -H "X-API-Key: devops-training-key-2026" `
+>>     http://localhost:8080/api/users
+HTTP Status: 200
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 5. Test rate limiting with rapid requests
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== RATE LIMIT TEST ==========" -ForegroundColor Yellow
+
+========== RATE LIMIT TEST ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 1..10 | ForEach-Object {
+>>     $status = curl.exe -s -o NUL -w "%{http_code}" `
+>>         -H "X-API-Key: devops-training-key-2026" `
+>>         http://localhost:8080/api/users
+>> 
+>>     Write-Host "Request $_ : HTTP $status"
+>> }
+Request 1 : HTTP 200
+Request 2 : HTTP 200
+Request 3 : HTTP 429
+Request 4 : HTTP 429
+Request 5 : HTTP 429
+Request 6 : HTTP 429
+Request 7 : HTTP 429
+Request 8 : HTTP 429
+Request 9 : HTTP 429
+Request 10 : HTTP 429
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 6. Verify health endpoint remains accessible
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== HEALTH CHECK ==========" -ForegroundColor Cyan
+
+========== HEALTH CHECK ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> curl.exe -s -o NUL -w "HTTP Status: %{http_code}`n" `
+>>     http://localhost:8080/health
+HTTP Status: 200
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> # 7. Check NGINX logs
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> Write-Host "`n========== NGINX LOGS ==========" -ForegroundColor Cyan
+
+========== NGINX LOGS ==========
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> docker compose logs --tail 30 nginx
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker processes
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 21
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 22
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 23
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 24
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 25
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 26
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 27
+devops-api-gateway  | 2026/11/19 09:30:46 [notice] 1#1: start worker process 28
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 200 133 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 200 133 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 200 133 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 24#24: *7 limiting requests, excess: 2.556 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 25#25: *8 limiting requests, excess: 2.498 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 26#26: *9 limiting requests, excess: 2.412 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 27#27: *10 limiting requests, excess: 2.356 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 28#28: *11 limiting requests, excess: 2.308 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 21#21: *12 limiting requests, excess: 2.230 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 21#21: *13 limiting requests, excess: 2.192 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 2026/11/19 09:30:47 [error] 21#21: *14 limiting requests, excess: 2.154 by zone "api_limit", client: 172.18.0.1, server: localhost, request: "GET /api/users HTTP/1.1", host: "localhost:8080"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /api/users HTTP/1.1" 429 169 "-" "curl/8.22.0" "-"
+devops-api-gateway  | 172.18.0.1 - - [19/Nov/2026:09:30:47 +0000] "GET /health HTTP/1.1" 200 20 "-" "curl/8.22.0" "-"
+PS C:\Users\mitta\OneDrive\Desktop\sample app\Demo-App-docs-upload\DevOps-Simple-App> 
