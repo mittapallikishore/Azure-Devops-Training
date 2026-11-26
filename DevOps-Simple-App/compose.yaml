@@ -1,0 +1,30 @@
+
+services:
+  web:
+    build: .
+    image: devops-simple-app:1.0
+    container_name: devops-simple-app
+    expose:
+      - "3000"
+    depends_on:
+      - payment
+    restart: unless-stopped
+
+  payment:
+    build: ./payment-service
+    image: devops-payment-service:1.0
+    container_name: devops-payment-service
+    expose:
+      - "4000"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: devops-api-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+    restart: unless-stopped
