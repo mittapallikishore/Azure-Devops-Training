@@ -1,0 +1,80 @@
+services:
+  primary:
+    image: postgres:16-alpine
+    container_name: db-primary
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app_admin
+      POSTGRES_PASSWORD: AppAdmin123!
+      POSTGRES_DB: application_db
+    ports:
+      - "5432:5432"
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+      - -c
+      - hot_standby=on
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+    volumes:
+      - primary_data:/var/lib/postgresql/data
+      - ./primary/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_admin -d application_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  replica:
+    image: postgres:16-alpine
+    container_name: db-replica
+    restart: unless-stopped
+    depends_on:
+      primary:
+        condition: service_healthy
+    environment:
+      PGDATA: /var/lib/postgresql/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until pg_isready -h primary -p 5432 -U app_admin -d application_db; do
+          echo "Waiting for primary database..."
+          sleep 2
+        done
+
+        if [ ! -s "$$PGDATA/PG_VERSION" ]; then
+          echo "Creating initial replica using pg_basebackup..."
+          PGPASSWORD='ReplicaPass123!' pg_basebackup \
+            -h primary \
+            -p 5432 \
+            -D "$$PGDATA" \
+            -U replicator \
+            -Fp \
+            -Xs \
+            -P \
+            -R
+
+          echo "Configuring replica connection..."
+          printf "\nprimary_conninfo = 'host=primary port=5432 user=replicator password=ReplicaPass123! application_name=db-replica'\n" >> "$$PGDATA/postgresql.auto.conf"
+        fi
+
+        exec docker-entrypoint.sh postgres -c hot_standby=on
+    ports:
+      - "5433:5432"
+    volumes:
+      - replica_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_admin -d application_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  primary_data:
+  replica_data:
